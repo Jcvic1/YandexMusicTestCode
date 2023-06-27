@@ -1,0 +1,104 @@
+{% load template_filters %}
+
+
+<div class="my-2">
+  {% if searched %}
+  <p class="text-center text-light">You Searched For <span class="text-success">{{ searched }}</span></p>
+  {% else %}
+  <p class="text-center text-light">No Search Found</p>
+  {% endif %}
+</div>
+
+{% if tag == 'profile' %}
+
+<ul id="update-all-people" class="list-group list-group-flush">
+  {% for user_profile in profile_lists %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a hx-post="{% url 'page' user_profile.id %}"  hx-target="#profile"><img src="{{user_profile.profile_pic.url}}"
+            alt="{{user_profile.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if user_profile.last_seen|update_last_seen %}
+        <span style="position: absolute;
+        background: #2afa6a;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+        background: #616161;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        
+          <div>
+              <h5 class="mt-3">
+                {{user_profile.user}}</h5>
+            </div>
+          
+      
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+
+{% else %}
+
+
+<ul id="update-all-people" class="list-group list-group-flush">
+  {% for user_profile in profile_lists %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a hx-post="{% url 'page' user_profile.id %}"  hx-target="#people"><img src="{{user_profile.profile_pic.url}}"
+            alt="{{user_profile.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if user_profile.last_seen|update_last_seen %}
+        <span style="position: absolute;
+        background: #2afa6a;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+        background: #616161;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        
+          <div>
+              <h5 class="mt-3">
+                {{user_profile.user}}</h5>
+            </div>
+      
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+
+{% endif %}
+
+<hr>

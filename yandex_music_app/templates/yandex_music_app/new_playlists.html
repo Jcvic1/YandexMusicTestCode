@@ -1,0 +1,73 @@
+{% load static %}
+{% load template_filters %}
+<div id="{{new_playlists_full_.id}}">
+    <div class="d-flex justify-content-center"><button id="btn_{{new_playlists_full_.id}}"
+            class="btn w-25 rounded-pill"><i class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <h5 class="text-center my-3">New and popular music selected by our editorial team just for you</h5>
+    <ul class="list-group text-white">
+
+        <div class="my-3">{{new_playlists_full.title}}</div>
+
+
+        <div class="container">
+            <div class="row">
+                {% for playlist in new_playlists_full %}
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                    <form hx-post="{% url 'playlist' playlist.uid playlist.kind %}"
+                        hx-target="#new_new_release_full_playlist_{{playlist.kind}}" hx-swap="innerHTML"
+                        hx-indicator="#load_new_new_release_full_playlist_{{playlist.kind}}">
+
+                        <button type="submit">
+                            {% if playlist.cover.uri %}<img class="rounded w-100"
+                                src="{{playlist.cover.uri|replace|extend}}" alt="">{% else %}<img class="rounded w-100"
+                                src="{{playlist.og_image|replace|extend}}" alt="">{% endif %}
+                        </button>
+
+                    </form>
+
+                    <div class=" d-flex justify-content-between flex-nowrap my-2 w-100">
+
+                        <div class="ms-1" style="text-align: left;">
+                            <div class="text-light">
+                                {{playlist.title}}
+                            </div>
+                            <div class="text-secondary" style="font-weight: 400;">
+                                {% for artist in playlist.artists%}{% if not forloop.last %}
+                                {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+                                <div>{{playlist.description}}</div>
+                            </div>
+                        </div>
+                        <div class="my-auto">
+                            {% if playlist.content_warning == 'explicit' %}
+                            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div id="load_new_new_release_full_playlist_{{playlist.kind}}" class="htmx-indicator w-100 mb-2">
+                        <div class="text-center">
+                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="new_new_release_full_playlist_{{playlist.kind}}" class="client-show-track-list">
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+    </ul>
+</div>
+
+
+<script>
+    document.getElementById('btn_{{new_playlists_full_.id}}').addEventListener('click', () => {
+        document.getElementById('{{new_playlists_full_.id}}').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('{{new_playlists_full_.id}}').remove();
+        }, 500);
+    });
+</script>

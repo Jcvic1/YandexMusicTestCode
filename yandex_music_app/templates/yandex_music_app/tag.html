@@ -1,0 +1,51 @@
+{% load static %}
+{% load template_filters %}
+{% if mixes.tag.value %}
+<div id="{{mixes.tag.value}}" style="transition: opacity 0.5s ease-out;">
+    <div class="d-flex justify-content-center"><button id="btn_{{mixes.tag.value}}" class="btn w-25 rounded-pill"><i
+                class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <div style="border-radius: 30px;padding-left: 0;" class="border border-warning">
+        <div class="text-center my-1">{{mixes.tag.name}}</div>
+        {% for playlist in playlists %}
+        <form hx-post="{% url 'playlist' playlist.uid playlist.kind %}"
+            hx-target="#display_playlist_mixes_{{playlist.kind}}" hx-swap="innerHTML"
+            hx-indicator="#load_new_playlist_mixes_{{playlist.kind}}"><button class="w-100" type="submit">
+                <li class="list-group-item step rounded-pill w-100">
+                    <div class="d-flex">{% if playlist.cover.uri %}<img
+                            style="height: 50px; width: 50px; border-radius: 50%;"
+                            src="{{playlist.cover.uri|replace|extend}}" class="rounded-circle my-auto"
+                            alt="">{% else %}<img style="height: 50px; width: 50px; border-radius: 50%;"
+                            src="{{playlist.og_image|replace|extend}}" class="rounded-circle my-auto" alt="">{% endif %}
+                        <div class="d-flex flex-column ms-3 my-auto" style="text-align: left;">
+                            <div class=" text-light text-state">
+                                {{playlist.title}}</div>
+                            <div class="text-secondary text-state" style="font-weight: 400;"> {{playlist.track_count}}
+                                tracks</div>
+                        </div>
+                    </div>
+                </li>
+            </button></form>
+        <div id="load_new_playlist_mixes_{{playlist.kind}}" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+        <div id="display_playlist_mixes_{{playlist.kind}}" class="client-show-track-list" style="z-index: 999;">
+
+        </div>
+
+        {% endfor %}
+    </div>
+</div>
+<script>
+    document.getElementById('btn_{{mixes.tag.value}}').addEventListener('click', () => {
+        document.getElementById('{{mixes.tag.value}}').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('{{mixes.tag.value}}').remove();
+        }, 500);
+    });
+</script>
+
+{% endif %}

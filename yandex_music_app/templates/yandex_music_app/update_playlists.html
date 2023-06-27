@@ -1,0 +1,171 @@
+{% load static %}
+{% load template_filters %}
+
+{% for playlist in playlists %}
+{% if forloop.last %}
+{% if page %}
+<div hx-post="{% url 'update_playlists' searched  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_new_playlist">
+</div>
+{% endif %}
+{% else %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'playlist' playlist.uid playlist.kind %}"
+            hx-target="#display_playlist_{{playlist.kind}}_s_playlists" hx-swap="innerHTML"
+            hx-indicator="#load_new_{{playlist.kind}}_s_playlists"><input type="hidden" name="tag"
+                value="s_playlist"><button class="w-100" type="submit">
+                <div class="d-flex track">
+                    {% if playlist.cover.uri %}<img style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="{{playlist.cover.uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}<img
+                        style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="{{playlist.og_image|replace|extend}}" class="rounded-circle my-auto" alt="">{% endif %}<div
+                        class="d-flex flex-column ms-3 my-auto" style="text-align: left;">
+                        <div class=" text-light text-state">
+                            {{playlist.title}}</div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{playlist.track_count}}
+                            tracks</div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if playlist.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{playlist.kind}}_s_playlist" type="submit"><i
+                        id="icon_desc_{{playlist.kind}}_s_playlist" class="bi bi-three-dots-vertical text-light"
+                        style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ PLAYLIST CARD---------- -->
+
+    <div id="desc_{{playlist.kind}}_s_playlist" class="mx-auto my-auto mt-4 show-track-desc"
+        style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if playlist.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{playlist.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{playlist.og_image|replace|extend}}" class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{playlist.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if playlist.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+
+                            {{playlist.track_count}} tracks
+                        </div>
+                    </div>
+
+                </div>
+
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist">
+                                    <input type="hidden" name="tag" value="playlist_like"><input type="hidden" name="id"
+                                        value="{{playlist.uid}}:{{playlist.kind}}"><input type="hidden" name="location"
+                                        value="s_playlist"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist">
+                                            {% if playlist.kind|join_var:playlist.uid in fav_playlists %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{playlist.kind}}_{{forloop.counter}}_s_playlist">
+                                    <input type="hidden" name="tag" value="playlist_dislike"><input type="hidden"
+                                        name="id" value="{{playlist.uid}}:{{playlist.kind}}"><input type="hidden"
+                                        name="location" value="s_playlist"><button type="submit"
+                                        class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{playlist.kind}}_{{forloop.counter}}_s_playlist"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{playlist.kind}}_{{forloop.counter}}_s_playlist"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{playlist.kind}}_s_playlist').addEventListener("click", function () {
+            if (document.getElementById('desc_{{playlist.kind}}_s_playlist').style.display === "none" &&
+                document.getElementById('icon_desc_{{playlist.kind}}_s_playlist').classList.contains(
+                    "text-light")) {
+                document.getElementById('desc_{{playlist.kind}}_s_playlist').style.display = "block";
+                document.getElementById('icon_desc_{{playlist.kind}}_s_playlist').classList.remove(
+                "text-light");
+                document.getElementById('icon_desc_{{playlist.kind}}_s_playlist').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{playlist.kind}}_s_playlist').style.display = "none";
+                document.getElementById('icon_desc_{{playlist.kind}}_s_playlist').classList.remove(
+                    "text-warning");
+                document.getElementById('icon_desc_{{playlist.kind}}_s_playlist').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END PLAYLIST CARD---------- -->
+</li>
+<div id="load_new_{{playlist.kind}}_s_playlists" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_playlist_{{playlist.kind}}_s_playlists">
+
+</div>
+{% endif %}
+{% endfor %}

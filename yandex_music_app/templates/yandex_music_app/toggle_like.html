@@ -1,0 +1,325 @@
+{% load template_filters %}
+{% load static %}
+
+{% if location == 'player_track' %}
+
+{%if success and tag == 'track_like' %}
+
+<input type="hidden" name="tag" value="track_dislike">
+
+{% else %}
+
+<input type="hidden" name="tag" value="track_like">
+
+{% endif %}
+<input type="hidden" name="id" value="{{id}}"><input type="hidden" name="location" value="{{location}}"><button
+    type="submit" class="btn w-100 rounded-pill">
+    <span id="">
+        {% if error %}
+
+        <i class="bi bi-slash-circle text-danger me-2"></i>
+
+        {% elif success and tag == 'track_like' %}
+
+        <i class="bi bi-heart text-warning"></i>
+
+        {% else %}
+
+        <i class="bi bi-heart text-light"></i>
+
+        {% endif %}</span></button>
+
+{% elif tag|toggle_like_tag == 'track' %}
+<div class="d-flex">
+    <div class="d-flex flex-column w-50 text-center">
+        <li class="list-group-item rounded-pill">
+            <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                hx-swap="innerHTML" hx-indicator="#load_new_toggle_like_{{id}}_{{location}}"><input type="hidden"
+                    name="tag" value="track_like"><input type="hidden" name="id" value="{{id}}"><input type="hidden"
+                    name="location" value="{{location}}"><button type="submit" class="btn w-100 rounded-pill"><span
+                        id="">
+
+
+                        {% if error %}
+
+                        <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                        {% elif success and tag == 'track_like' %}
+
+                        <i class="bi bi-heart text-warning me-2"><span class="ms-2">Like</span></i>
+
+                        {% else %}
+
+                        <i class="bi bi-heart text-light me-2"><span class="ms-2">Like</span></i>
+
+                        {% endif %}
+
+
+                    </span></button></form>
+        </li>
+        <div id="load_new_toggle_like_{{id}}_{{location}}" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+
+    </div>
+    <div class="d-flex flex-column w-50 text-center">
+        <li class="list-group-item rounded-pill">
+            <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                hx-swap="innerHTML" hx-indicator="#load_new_toggle_dislike_{{id}}_{{location}}"><input type="hidden"
+                    name="tag" value="track_dislike"><input type="hidden" name="id" value="{{id}}"><input type="hidden"
+                    name="location" value="{{location}}"><button type="submit" class="btn w-100 rounded-pill"><span
+                        id="">
+
+                        {% if error %}
+
+                        <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                        {% elif success and tag == 'track_dislike' %}
+
+                        <span><i class="bi bi-heartbreak text-danger me-2"><span class="ms-2">Dislike</span></i>
+
+                            {% else %}
+
+                            <i class="bi bi-heartbreak text-light me-2"><span class="ms-2">Dislike</span></i>
+
+                            {% endif %}
+
+                        </span></button></form>
+        </li>
+        <div id="load_new_toggle_dislike_{{id}}_{{location}}" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+
+    {% elif tag|toggle_like_tag == 'album' %}
+    <div class="d-flex">
+        <div class="d-flex flex-column w-50 text-center">
+            <li class="list-group-item rounded-pill">
+                <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                    hx-swap="innerHTML" hx-indicator="#load_new_toggle_like_{{id}}_{{location}}"><input type="hidden"
+                        name="tag" value="album_like"><input type="hidden" name="id" value="{{id}}"><input type="hidden"
+                        name="location" value="{{location}}"><button type="submit" class="btn w-100 rounded-pill"><span
+                            id="">
+
+
+                            {% if error %}
+
+                            <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                            {% elif success and tag == 'album_like' %}
+
+                            <i class="bi bi-heart text-warning me-2"><span class="ms-2">Like</span></i>
+
+                            {% else %}
+
+                            <i class="bi bi-heart text-light me-2"><span class="ms-2">Like</span></i>
+
+                            {% endif %}
+
+
+                        </span></button></form>
+            </li>
+            <div id="load_new_toggle_like_{{id}}_{{location}}" class="htmx-indicator">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+
+        </div>
+        <div class="d-flex flex-column w-50 text-center">
+            <li class="list-group-item rounded-pill">
+                <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                    hx-swap="innerHTML" hx-indicator="#load_new_toggle_dislike_{{id}}_{{location}}"><input type="hidden"
+                        name="tag" value="album_dislike"><input type="hidden" name="id" value="{{id}}"><input
+                        type="hidden" name="location" value="{{location}}"><button type="submit"
+                        class="btn w-100 rounded-pill"><span id="">
+
+                            {% if error %}
+
+                            <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                            {% elif success and tag == 'album_dislike' %}
+
+                            <span><i class="bi bi-heartbreak text-danger me-2"><span class="ms-2">Dislike</span></i>
+
+                                {% else %}
+
+                                <i class="bi bi-heartbreak text-light me-2"><span class="ms-2">Dislike</span></i>
+
+                                {% endif %}
+
+                            </span></button></form>
+            </li>
+            <div id="load_new_toggle_dislike_{{id}}_{{location}}" class="htmx-indicator">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        {% elif tag|toggle_like_tag == 'playlist' %}
+
+        <div class="d-flex">
+            <div class="d-flex flex-column w-50 text-center">
+                <li class="list-group-item rounded-pill">
+                    <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                        hx-swap="innerHTML" hx-indicator="#load_new_toggle_like_{{id}}_{{location}}"><input
+                            type="hidden" name="tag" value="playlist_like"><input type="hidden" name="id"
+                            value="{{id}}"><input type="hidden" name="location" value="{{location}}"><button
+                            type="submit" class="btn w-100 rounded-pill"><span id="">
+
+
+                                {% if error %}
+
+                                <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                                {% elif success and tag == 'playlist_like' %}
+
+                                <i class="bi bi-heart text-warning me-2"><span class="ms-2">Like</span></i>
+
+                                {% else %}
+
+                                <i class="bi bi-heart text-light me-2"><span class="ms-2">Like</span></i>
+
+                                {% endif %}
+
+
+                            </span></button></form>
+                </li>
+                <div id="load_new_toggle_like_{{id}}_{{location}}" class="htmx-indicator">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+
+            </div>
+            <div class="d-flex flex-column w-50 text-center">
+                <li class="list-group-item rounded-pill">
+                    <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                        hx-swap="innerHTML" hx-indicator="#load_new_toggle_dislike_{{id}}_{{location}}"><input
+                            type="hidden" name="tag" value="playlist_dislike"><input type="hidden" name="id"
+                            value="{{id}}"><input type="hidden" name="location" value="{{location}}"><button
+                            type="submit" class="btn w-100 rounded-pill"><span id="">
+
+                                {% if error %}
+
+                                <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                                {% elif success and tag == 'playlist_dislike' %}
+
+                                <span><i class="bi bi-heartbreak text-danger me-2"><span class="ms-2">Dislike</span></i>
+
+                                    {% else %}
+
+                                    <i class="bi bi-heartbreak text-light me-2"><span class="ms-2">Dislike</span></i>
+
+                                    {% endif %}
+
+                                </span></button></form>
+                </li>
+                <div id="load_new_toggle_dislike_{{id}}_{{location}}" class="htmx-indicator">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            {% elif tag|toggle_like_tag == 'artist' %}
+
+            <div class="d-flex">
+                <div class="d-flex flex-column w-50 text-center">
+                    <li class="list-group-item rounded-pill">
+                        <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                            hx-swap="innerHTML" hx-indicator="#load_new_toggle_like_{{id}}_{{location}}"><input
+                                type="hidden" name="tag" value="artist_like"><input type="hidden" name="id"
+                                value="{{id}}"><input type="hidden" name="location" value="{{location}}"><button
+                                type="submit" class="btn w-100 rounded-pill"><span id="">
+
+
+                                    {% if error %}
+
+                                    <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                                    {% elif success and tag == 'artist_like' %}
+
+                                    <i class="bi bi-heart text-warning me-2"><span class="ms-2">Like</span></i>
+
+                                    {% else %}
+
+                                    <i class="bi bi-heart text-light me-2"><span class="ms-2">Like</span></i>
+
+                                    {% endif %}
+
+
+                                </span></button></form>
+                    </li>
+                    <div id="load_new_toggle_like_{{id}}_{{location}}" class="htmx-indicator">
+                        <div class="text-center">
+                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+
+                </div>
+                <div class="d-flex flex-column w-50 text-center">
+                    <li class="list-group-item rounded-pill">
+                        <form hx-post="{% url 'toggle_like' %}" hx-target="#display_toggle_like_{{id}}_{{location}}"
+                            hx-swap="innerHTML" hx-indicator="#load_new_toggle_dislike_{{id}}_{{location}}"><input
+                                type="hidden" name="tag" value="artist_dislike"><input type="hidden" name="id"
+                                value="{{id}}"><input type="hidden" name="location" value="{{location}}"><button
+                                type="submit" class="btn w-100 rounded-pill"><span id="">
+
+                                    {% if error %}
+
+                                    <i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i>
+
+                                    {% elif success and tag == 'artist_dislike' %}
+
+                                    <span><i class="bi bi-heartbreak text-danger me-2"><span
+                                                class="ms-2">Dislike</span></i>
+
+                                        {% else %}
+
+                                        <i class="bi bi-heartbreak text-light me-2"><span
+                                                class="ms-2">Dislike</span></i>
+
+                                        {% endif %}
+
+                                    </span></button></form>
+                    </li>
+                    <div id="load_new_toggle_dislike_{{id}}_{{location}}" class="htmx-indicator">
+                        <div class="text-center">
+                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                {% endif %}

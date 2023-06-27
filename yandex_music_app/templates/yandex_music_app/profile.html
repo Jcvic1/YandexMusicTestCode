@@ -1,0 +1,377 @@
+{% load template_filters %}
+{% include 'yandex_music_app/msg.html' %}
+<div class="header__wrapper">
+  <header class="border border-rounded" style="background: url({{profile.banner.url}}) no-repeat 50% 20% / cover;"></header>
+  <div class="container" data-bs-theme="dark">
+    <div class="row">
+      <div class="cols__container">
+        <div class="col-sm-12 col-lg-12">
+          <div class="left__col">
+            <div class="md">
+              <div class="img__container">
+                <img src="{{profile.profile_pic.url}}" alt="{{profile.user.username}}"
+                  style="border: 5px solid black;" />
+                {% if profile.last_seen|update_last_seen %}
+                <span class="green"></span>
+                {% else %}
+                <span class="grey"></span>
+                {% endif %}
+
+
+              </div>
+              <h2 class="mb-5">{{profile.user}}</h2>
+
+
+              <ul id="update-count" class="ull about">
+                <a  {% if from_ == 'profile' %} href="#followers-profile" {% else %} href="#followers" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+                  <li class="mx-3">{% if followers.count == 0 %}<span
+                      class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+                      class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers
+                  </li>
+                </a>
+
+                <a  {% if from_ == 'profile' %} href="#following-profile" {% else %} href="#following" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="following">
+                  <li class="mx-3">{% if profile.follow.count == 0 %}<span
+                      class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+                      class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %}
+                    Following
+                  </li>
+                </a>
+
+              </ul>
+
+              
+              
+              <a hx-post="{% url 'page' profile.id %}?from=profile" hx-target="#profile" hx-indicator="#load_home"><button type="button"
+                class=" btn btn-outline-light my-3 w-100 rounded-pill">
+                <i class="bi bi-person"></i>
+                <div style="font-size: small;">About Me</div>
+              </button></a>
+              
+
+              
+
+            </div>
+          </div>
+        </div>
+
+        <div class="col-sm-12 col-lg-12">
+          <div class="right__col">
+            <div class="md text-center">
+              
+              <div class="d-flex justify-content-center  ">
+               
+                  <a hx-get="{% url 'edit_profile' %}" hx-target="#profile"><button type="button"
+                      class=" btn btn-outline-light mx-3 my-3 rounded-pill">
+                      <i class="bi bi-pen"></i>
+                      <span style="font-size: small;">Edit Profile</span>
+                    </button></a>
+                  <a hx-post="{% url 'profile_status' %}" hx-target="#profile"><button type="button"
+                      class=" btn btn-outline-light mx-3 my-3 rounded-pill">
+                      <span style="font-size: small;">{% if profile %}{% for state in profile.states.all %}
+                        {% if state.followers_only is True %}<span style="font-size: small;">
+                          <i class="bi bi-person-circle fs-6 "></i> Everyone
+                        </span>{% else %}<span style="font-size: small;">
+                          <i class="bi bi-people fs-6"></i> Friends Only
+                        </span>{% endif %}{% endfor %}{% endif %}</span>
+                </button></a>
+
+              </div>
+
+              <div class="md content">
+                <h4>Thoughts</h4>
+                <p class="text-light rounded-pill d-flex justify-content-center align-items-center" style="border: 1px solid white; border-radius: 10px; min-height: 120px;">
+                  {{profile.thought}}
+                </p>
+
+                
+              </div>
+
+
+
+            </div></div></div>
+
+      </div>
+    </div>
+
+
+    <div id="add_track_update">
+      {% if profile.yandex_music_tracks %}
+      
+       <div class="my-5">
+         <div class="row">
+           {% for yandex_music_track in profile.yandex_music_tracks.all %}
+           <div class="col-sm-12 col-lg-4 my-2">
+             <form hx-post="{% url 'track' yandex_music_track.track_id %}" hx-target="#player_console" hx-indicator="#top_track_{{yandex_music_track.track_id}}" hx-swap="innerHTML">
+             <button type="submit">
+             <div class="d-flex  align-content-center">
+               <div class="mx-3 position-relative">
+                 <div id="top_track_{{yandex_music_track.track_id}}" class="htmx-indicator position-absolute top-50 start-50 translate-middle">
+                   <div class="text-center my-1">
+                       <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                           <span class="visually-hidden">Loading...</span>
+                       </div>
+                   </div>
+               </div>
+               <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{yandex_music_track.avatar_url|replace|extend}}"
+                 class="rounded-circle my-auto border border-warning" alt="{{yandex_music_track.avatar_url}}"></div>
+               <div class="flex-grow-1 my-auto" style="text-align: left;">
+                 <div class="d-flex"><div class="text-warning">Track</div>  : <div class="ms-1 text-light">{{yandex_music_track.track_name}}</div></div>
+                 <div class="d-flex"><div class="text-warning">Artist</div>: <div class="ms-1 text-light">{{yandex_music_track.track_artists}}</div></div>
+                 <div>{% if yandex_music_track.explicit_state %}<i class="bi bi-explicit text-warning"></i>{% endif %}</div>
+               </div>
+             </div>
+           </button>
+           </form>
+           <form class="my-2 d-flex justify-content-center" hx-post="{% url 'add_tracks' yandex_music_track.track_id %}" hx-indicator="#top_track_{{yandex_music_track.track_id}}" hx-swap="none">
+            <input type="hidden" name="delete" value="delete">
+            <button type="submit" class="btn btn-outline-danger rounded-pill w-50 ">Delete</button>
+           </form>
+           </div>
+           {% endfor %}
+         </div>
+   
+       </div>
+   
+       {% endif %}
+     </div>
+
+
+    <hr class="my-1 ">
+    <ul class="ull">
+      
+      {% if profile.media_link %}
+      {% for media_link in profile.media_link.all %}
+      {% if media_link.name == 'twitter' %}{% if media_link.suffix %}<li><a href="https://www.twitter.com/{{media_link.suffix}}" target="_blank" rel="noreferrer"><i class="fab fa-twitter text-primary"></i></a></li>{% else %}<li><a><i class="fab fa-twitter" style="color: #7b7b7a; opacity: .375;"></i></a></li>{% endif %}
+      {% endif %}
+      {% endfor %}
+      {% for media_link in profile.media_link.all %}
+      {% if media_link.name == 'vk' %}{% if media_link.suffix %}<li><a href="https://www.vk.com/{{media_link.suffix}}" target="_blank" rel="noreferrer"><i class="fab fa-vk text-primary"></i></a></li>{% else %}<li><a><i class="fab fa-vk" style="color: #7b7b7a; opacity: .375;"></i></a></li>{% endif %}
+      {% endif %}
+      {% endfor %}
+      {% for media_link in profile.media_link.all %}
+      {% if media_link.name == 'facebook' %}{% if media_link.suffix %}<li><a href="https://www.fb.com/{{media_link.suffix}}" target="_blank" rel="noreferrer"><i class="fab fa-facebook text-primary"></i></a></li>{% else %}<li><a><i class="fab fa-facebook" style="color: #7b7b7a; opacity: .375;"></i></a></li>{% endif %}
+      {% endif %}
+      {% endfor %}
+      {% for media_link in profile.media_link.all %}
+      {% if media_link.name == 'instagram' %}{% if media_link.suffix %}<li><a href="https://www.instagram.com/{{media_link.suffix}}" target="_blank" rel="noreferrer"><i class="fab fa-instagram " style="color: #d37a5a;"></i></a></li>{% else %}<li><a><i class="fab fa-instagram" style="color: #7b7b7a; opacity: .375;"></i></a></li>{% endif %}
+      {% endif %}
+      {% endfor %}
+
+      {% endif %}
+    </ul>
+
+    <hr class="mt-3 ">
+
+
+  </div>
+</div>
+
+
+
+<!-- FOLLOWERS -->
+
+<div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" data-bs-scroll="true" id="followers-profile"
+aria-labelledby="peopleLabel" style="z-index: 1400; border-top-right-radius: 2.5rem;">
+<div class="offcanvas-header  ">
+  <div class="d-flex justify-content-between" style="width: 100%;">
+    <div class="mx-auto">
+      <h5 class="offcanvas-title text-center text-warning" id="peopleLabel">Followers</h5>
+    </div>
+    <div class="mx-2">
+      <a class="btn btn-outline-secondary border rounded-pill ms-2 " aria-controls="search_people">
+        <button onclick="peopleSearch()" id="followers-search"><i class="fa fa-search text-light"></i></button>
+      </a>
+    </div>
+  </div>
+  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div class="offcanvas-body">
+  <div id="load_home_follower" class="htmx-indicator">
+    <div class="text-center">
+      <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+        <span class="visually-hidden">Loading...</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="search-profile" style="display: none;">
+    <div class="input-group bg-light border rounded-pill">
+      <input hx-post="{% url 'search_profile' %}?tag=profile" hx-target="#profile-follower-suggestions" 
+        hx-trigger="keyup changed delay:500ms" class="form-control search border-0  rounded-pill" type="search"
+        name="searched" placeholder="search people">
+      <span class="input-group-append">
+        <button class="btn rounded-pill " type="submit">
+          <span class="text-dark"><i class="bi bi-search"></i></span>
+        </button>
+      </span>
+    </div>
+
+    <div id="profile-follower-suggestions"></div>
+  </div>
+  <ul id="update-all-follower" class="list-group list-group-flush">
+    {% for follower in followers %}
+    {% if follower.user.is_active == True %}
+    <li class="list-group-item bg-dark text-light rounded-pill">
+      <div class="d-flex">
+        <div class=" my-auto" style="position: relative;">
+          <a type="button" class=" d-flex justify-content-center align-content-center " hx-post="{% url 'page' follower.id %}?from=profile" hx-target="#profile" hx-indicator="#load_home_follower"><img src="{{follower.profile_pic.url}}"
+              alt="{{follower.username}}"
+              style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+          </a>{% if follower.last_seen|update_last_seen %}
+          <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% else %}
+          <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 text-center ">
+          <div>
+            <h5 class="mb-3">
+              {{follower.user}}</h5>
+          </div>
+
+            {% if follower not in profile.follow.all %}
+
+            <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+              hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="from" value="profile">
+              <input type="hidden" name="tag" value="{{follower.id}}">
+              <input type="hidden" name="tag_type" value="followers">
+              <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+                Follow
+              </button>
+            </form>
+            {% else %}
+            <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+              hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="from" value="profile">
+              <input type="hidden" name="tag" value="{{follower.id}}">
+              <input type="hidden" name="tag_type" value="followers">
+              <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+                Unfollow
+              </button>
+            </form>
+
+            {% endif %}
+
+        </div>
+      </div>
+
+    </li>
+    {% endif %}
+    {% endfor %}
+
+  </ul>
+</div>
+</div>
+
+<!-- FOLLOWING -->
+
+
+<div class="offcanvas offcanvas-start bg-dark text-light" tabindex="-1" data-bs-scroll="true" id="following-profile"
+aria-labelledby="peopleLabel" style="z-index: 1400; border-top-right-radius: 2.5rem;">
+<div class="offcanvas-header  ">
+  <div class="d-flex justify-content-between" style="width: 100%;">
+    <div class="mx-auto">
+      <h5 class="offcanvas-title text-center text-warning" id="peopleLabel">Following</h5>
+    </div>
+    <div class="mx-2">
+      <a class="btn btn-outline-secondary border rounded-pill ms-2 " aria-controls="search_people">
+        <button onclick="peopleSearch()" id="followers-search"><i class="fa fa-search text-light"></i></button>
+      </a>
+    </div>
+  </div>
+  <button type="button" class="btn-close btn-close-white" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+</div>
+<div id="load_home_following" class="htmx-indicator">
+  <div class="text-center">
+    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+<div class="offcanvas-body">
+  <div class="search-profile" style="display: none;">
+    <div class="input-group bg-light border rounded-pill">
+      <input hx-post="{% url 'search_profile' %}" hx-target="#profile-following-suggestions"
+        hx-trigger="keyup changed delay:500ms" class="form-control search border-0  rounded-pill" type="search"
+        name="searched" placeholder="search people">
+      <span class="input-group-append">
+        <button class="btn rounded-pill " type="submit">
+          <span class="text-dark"><i class="bi bi-search"></i></span>
+        </button>
+      </span>
+    </div>
+
+    <div id="profile-following-suggestions"></div>
+  </div>
+  <ul id="update-all-following" class="list-group list-group-flush">
+    {% for follow in profile.follow.all %}
+    {% if follow.user.is_active == True %}
+    <li id="update-following-{{follow.id}}" class="list-group-item bg-dark text-light rounded-pill ">
+      <div class="d-flex">
+        <div class=" my-auto" style="position: relative;">
+          <a type="button" class=" d-flex justify-content-center align-content-center " hx-post="{% url 'page' follow.id %}?from=profile" hx-target="#profile" hx-indicator="#load_home_following"><img src="{{follow.profile_pic.url}}"
+              alt="{{follow.user}}" style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+          </a>{% if follow.last_seen|update_last_seen %}
+          <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% else %}
+          <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 text-center ">
+          <div>
+            <h5 class="mb-3">
+              {{follow.user}}</h5>
+          </div>
+
+          <form hx-post="{% url 'follow' follow.id %}?from=profile" hx-target="#update-all-following" hx-indicator="#load_home_following"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="tag" value="{{follow.id}}">
+            <input type="hidden" name="tag_type" value="following">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+        </div>
+      </div>
+
+
+    </li>
+    {% endif %}
+    {% endfor %}
+
+  </ul>
+</div>
+</div>

@@ -1,0 +1,187 @@
+{% load static %}
+{% load template_filters %}
+
+{% for album in albums %}
+{% if forloop.last %}
+{% if page %}
+<div hx-post="{% url 'update_artist_albums' artist.id  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_artist_new_album">
+</div>
+{% endif %}
+{% else %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'album' album.id %}" hx-target="#display_album_{{album.id}}" hx-swap="innerHTML"
+            hx-indicator="#load_new_{{album.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track">
+                    {% if album.cover_uri %}<img style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="{{album.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}<img
+                        style="height: 50px; width: 50px; border-radius: 50%;" src="{{album.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}<div class="d-flex flex-column ms-3 my-auto"
+                        style="text-align: left;">
+                        <div class="text-light text-state">{{album.title}}</div>
+                        <div class="text-secondary text-state" style="font-weight: 400;">
+                            {% for artist in album.artists %}
+                            {% if not forloop.last %} {{artist.name}} , {% else %} {{artist.name}} {% endif %}
+                            {% endfor %} · {{album.year}} {% if album.type == None %} {% else %} · {{album.type}}
+                            {% endif %}</div>
+                    </div>
+
+                </div>
+            </button>
+        </form>
+        <div class="d-flex my-auto">
+            {% if album.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{album.id}}_artist_album" type="submit"><i
+                        id="icon_desc_{{album.id}}_artist_album" class="bi bi-three-dots-vertical text-light"
+                        style="font-size: 1.7rem;"></i></button>
+            </div>
+
+        </div>
+    </div>
+
+    <!------------ ALBUM CARD---------- -->
+
+    <div id="desc_{{album.id}}_artist_album" class="mx-auto my-auto mt-4 show-track-desc"
+        style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if album.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{album.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{album.og_image|replace|extend}}" class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{album.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if album.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% for artist in album.artists %}{% if not forloop.last %}
+                            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{album.year}}
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% if album.track_count == 1 %}{{album.track_count}} track
+                            {%elif album.track_count > 1 %}{{album.track_count}} tracks{% endif %}</div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{album.id}}_artist_album">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{album.id}}_artist_album" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{album.id}}_artist_album"><input type="hidden"
+                                        name="tag" value="album_like"><input type="hidden" name="id"
+                                        value="{{album.id}}"><input type="hidden" name="location"
+                                        value="artist_album"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{album.id}}_artist_album">{% if album.id in fav_albums %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{album.id}}_artist_album" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{album.id}}_artist_album" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{album.id}}_artist_album"><input
+                                        type="hidden" name="tag" value="album_dislike"><input type="hidden" name="id"
+                                        value="{{album.id}}"><input type="hidden" name="location"
+                                        value="artist_album"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{album.id}}_artist_album"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{album.id}}_artist_album" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_artist' album.id %}"
+                        hx-target="#display_to_artists_{{album.id}}_artist_album" hx-swap="innerHTML"
+                        hx-indicator="#load_new_to_artists_{{album.id}}_artist_album"><input type="hidden" name="tag"
+                            value="album"><button type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-mic text-light me-2"><span class="ms-2">Artist</span></i></button></form>
+                </li>
+                <div id="load_new_to_artists_{{album.id}}_artist_album" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_artists_{{album.id}}_artist_album">
+
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{album.id}}_artist_album').addEventListener("click", function () {
+            if (document.getElementById('desc_{{album.id}}_artist_album').style.display === "none" && document
+                .getElementById('icon_desc_{{album.id}}_artist_album').classList.contains("text-light")) {
+                document.getElementById('desc_{{album.id}}_artist_album').style.display = "block";
+                document.getElementById('icon_desc_{{album.id}}_artist_album').classList.remove("text-light");
+                document.getElementById('icon_desc_{{album.id}}_artist_album').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{album.id}}_artist_album').style.display = "none";
+                document.getElementById('icon_desc_{{album.id}}_artist_album').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{album.id}}_artist_album').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END ALBUM CARD---------- -->
+</li>
+<div id="load_new_{{album.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_album_{{album.id}}">
+
+</div>
+{% endif %}
+{% endfor %}

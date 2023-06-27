@@ -1,0 +1,166 @@
+{% load static %}
+{% load template_filters %}
+
+<div id="mixes">
+    <div class="d-flex justify-content-center"><button id="btn_mixes" class="btn w-25 rounded-pill"><i
+                class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <h5 class="text-center my-3">Mixes</h5>
+
+    <ul class="list-group text-white">
+        <div class="container">
+            <div class="row">
+                {% for data in mixes %}
+
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                    <div class="mx-2 my-3">
+                        <form hx-post="{% url 'tag' data.data.url|tag_extract %}" hx-target="#mixes_{{data.id}}"
+                            hx-swap="innerHTML" hx-indicator="#load_new_mixes_{{data.id}}">
+
+                            <button class="w-100" type="submit">
+                                <img class="rounded w-100" src="{{data.data.background_image_uri|replace|extend}}"
+                                    alt="">
+
+                            </button>
+                            <div style="margin-top: -25px; margin-left: 10px;">{{data.data.title}}</div>
+
+                        </form>
+
+
+
+                        <div id="load_new_mixes_{{data.id}}" class="htmx-indicator" style="margin-top: 25px;">
+                            <div class="text-center">
+                                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="mixes_{{data.id}}" class="mx-auto my-auto mt-3 client-show-track-list">
+
+                        </div>
+
+                    </div>
+                </div>
+
+                {% endfor %}
+            </div>
+        </div>
+
+
+        <div style="margin-bottom: 5rem;">
+
+        </div>
+    </ul>
+
+
+
+
+
+    <h5 class="text-center my-3">Genres</h5>
+
+    <ul class="list-group text-white">
+        <div class="container">
+            <div class="row">
+                {% for genre in genres %}
+                {% if genre.id == 'all' %}
+                <div class="text-center">{{genre.title}}</div>
+                {% else %}
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                    <div class="mx-2 my-3" style="text-align: left;">
+                        <div class="d-flex">
+                            {% if genre.url_part %} <form hx-post="{% url 'tag' genre.url_part %}"
+                                hx-target="#genres_{{genre.id}}" hx-swap="innerHTML"
+                                hx-indicator="#load_new_genres_{{genre.id}}">
+
+
+                                <button class="w-100" type="submit">
+                                    <div class="d-flex  align-items-center">
+                                        <img style="width: 50px; height: 50px;" class="rounded"
+                                            src="{{genre.radio_icon.image_url|replace|extend}}" alt="">
+                                        <div class="ms-2 text-light" style="font-size: medium; font-weight: 600;">
+                                            {{genre.title}}
+                                        </div>
+                                    </div>
+                                </button>
+
+                            </form>
+                            {% else %}
+                            <div class="d-flex  align-items-center">
+                                <img style="width: 50px; height: 50px;" class="rounded"
+                                    src="{{genre.radio_icon.image_url|replace|extend}}" alt="">
+                                <div class="ms-2 text-light" style="font-size: medium; font-weight: 600;">
+                                    {{genre.title}}
+                                </div>
+                            </div>
+
+                            {% endif %}
+                            <div id="load_new_genres_{{genre.id}}" class="htmx-indicator ms-2 my-auto">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="genres_{{genre.id}}" class="mx-auto my-auto mt-3 client-show-track-list">
+
+                        </div>
+                        {% for sub_genre in genre.sub_genres %}
+                        <div class="d-flex">
+                            <form hx-post="{% url 'tag' sub_genre.url_part %}" hx-target="#sub_genres_{{sub_genre.id}}"
+                                hx-swap="innerHTML" hx-indicator="#load_new_sub_genres_{{sub_genre.id}}">
+
+
+                                <button class="w-100" type="submit">
+                                    <div class="d-flex  align-items-center">
+                                        {% if sub_genre.radio_icon.image_url %}
+                                        <img style="width: 30px; height: 30px;" class="rounded"
+                                            src="{{sub_genre.radio_icon.image_url|replace|extend}}" alt="">
+                                        {% else %}
+                                        <img style="width: 30px; height: 30px;" class="rounded"
+                                            src="{% static 'img/playlist-cover_like_2x.png' %}" alt="">
+                                        {% endif %}
+                                        <div class="ms-2 text-light" style="font-size: small; font-weight: 400;">
+                                            {{sub_genre.title}}
+                                        </div>
+                                    </div>
+                                </button>
+                            </form>
+                            <div id="load_new_sub_genres_{{sub_genre.id}}" class="htmx-indicator ms-2 my-auto">
+                                <div class="text-center ">
+                                    <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                        <div id="sub_genres_{{sub_genre.id}}" class="mx-auto my-auto mt-3 client-show-track-list">
+
+                        </div>
+                        {% endfor %}
+
+                    </div>
+                </div>
+                {% endif %}
+                {% endfor %}
+            </div>
+        </div>
+
+
+        <div style="margin-bottom: 5rem;">
+
+        </div>
+    </ul>
+</div>
+
+
+
+<script>
+    document.getElementById('btn_mixes').addEventListener('click', () => {
+        document.getElementById('mixes').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('mixes').remove();
+        }, 500);
+    });
+</script>

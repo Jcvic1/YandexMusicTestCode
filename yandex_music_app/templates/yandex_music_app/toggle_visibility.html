@@ -1,0 +1,48 @@
+<div class="d-flex">
+    <div class="d-flex flex-column w-50 text-center">
+        <li class="list-group-item rounded-pill">
+            <form hx-post="{% url 'toggle_visibility' %}" hx-target="#display_toggle_visibility_{{id}}_c_user_playlist"
+                hx-swap="innerHTML" hx-indicator="#load_new_public_{{id}}_c_user_playlist"><input type="hidden"
+                    name="tag" value="public"><input type="hidden" name="id" value="{{id}}"><button type="submit"
+                    class="btn w-100 rounded-pill"><span id="">{% if error %}
+                        <span><i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i></span>
+                        {% elif playlist.visibility == 'public' %}
+                        <span><i class="bi bi-unlock text-warning me-2"><span class="ms-2">Public</span></i></span>
+                        {% else %}
+                        <i class="text-light"><span class="ms-2">{% if user_playlist.visibility == 'public' %}<i
+                                    class="bi bi-key text-warning me-2"></i>{%else%}{% endif %}Public</span></i>
+                        {% endif %}</span></button></form>
+        </li>
+        <div id="load_new_public_{{id}}_c_user_playlist" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="d-flex flex-column w-50 text-center">
+        <li class="list-group-item rounded-pill">
+            <form hx-post="{% url 'toggle_visibility' %}" hx-target="#display_toggle_visibility_{{id}}_c_user_playlist"
+                hx-swap="innerHTML" hx-indicator="#load_new_private_{{id}}_c_user_playlist"><input type="hidden"
+                    name="tag" value="private"><input type="hidden" name="id" value="{{id}}"><button type="submit"
+                    class="btn w-100 rounded-pill"><span id="">{% if error %}
+                        <span><i class="bi bi-slash-circle text-danger me-2"><span class="ms-2">Error</span></i></span>
+                        {% elif playlist.visibility == 'private' %}
+                        <span><i class="bi bi-lock text-warning me-2"><span class="ms-2">Private</span></i></span>
+                        {% else %}
+                        <i class="text-light"><span class="ms-2">{% if user_playlist.visibility == 'private' %}<i
+                                    class="bi bi-key text-warning me-2"></i>{%else%}{% endif %}Private</span></i>
+                        {% endif %}</span></button></form>
+        </li>
+        <div id="load_new_private_{{id}}_c_user_playlist" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>

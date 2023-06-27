@@ -1,0 +1,224 @@
+{% load static %}
+{% load template_filters %}
+
+{% for podcast_episode in podcast_episodes %}
+
+{% if forloop.last %}
+{% if page %}
+<div hx-post="{% url 'update_podcast_episodes' searched  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_new_episode">
+</div>
+{% endif %}
+{% else %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'episode' podcast_episode.id %}" hx-target="#player_console" hx-swap="innerHTML"
+            hx-indicator="#load_new_{{podcast_episode.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track-inner">
+                    {% if track.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="{{podcast_episode.cover_uri|replace|extend}}" class="rounded-circle my-auto"
+                        alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;"
+                        src="{{podcast_episode.og_image|replace|extend}}" class="rounded-circle my-auto"
+                        alt="">{% endif %}
+                    <div class="my-auto ms-3 " style="text-align: left;">
+                        <div class="text-light text-state">
+                            {{podcast_episode.title}}
+                        </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;">{{podcast.short_description}}
+                        </div>
+                    </div>
+
+                </div>
+            </button>
+        </form>
+        <div class="d-flex my-auto">
+            {% if podcast_episode.content_warning == 'explicit' %}
+            <div class="my-auto">
+                <i class="bi bi-explicit"></i>
+            </div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{podcast_episode.id}}_s_podcast_episode" type="submit"><i
+                        id="icon_desc_{{podcast_episode.id}}_s_podcast_episode"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+    <!------------ EPISODE CARD---------- -->
+
+    <div id="desc_{{podcast_episode.id}}_s_podcast_episode" class="mx-auto my-auto mt-4 show-track-desc"
+        style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if podcast_episode.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{podcast_episode.cover_uri|replace|extend}}" class="rounded-circle my-auto"
+                        alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{podcast_episode.og_image|replace|extend}}" class="rounded-circle my-auto"
+                        alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{podcast_episode.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if podcast_episode.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {{podcast_episode.duration_ms|to_mins_secs}}
+                        </div>
+
+                    </div>
+
+                </div>
+            </li>
+
+            {% if podcast_episode.short_description %}<div class="text-secondary p-2"
+                style="font-weight: 400; background-color: #d3d3d3; border-radius: 10px; margin: 10px;">
+                {{podcast_episode.short_description}}
+            </div> {% endif %}
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{podcast_episode.id}}_s_podcast_episode">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{podcast_episode.id}}_s_podcast_episode"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{podcast_episode.id}}_s_podcast_episode"><input
+                                        type="hidden" name="tag" value="track_like"><input type="hidden" name="id"
+                                        value="{{podcast_episode.id}}"><input type="hidden" name="location"
+                                        value="s_podcast_episode"><button type="submit"
+                                        class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{podcast_episode.id}}_s_podcast_episode">{% if podcast_episode.id|striptags in fav_tracks %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{podcast_episode.id}}_s_podcast_episode"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{podcast_episode.id}}_s_podcast_episode"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{podcast_episode.id}}_s_podcast_episode">
+                                    <input type="hidden" name="tag" value="track_dislike"><input type="hidden" name="id"
+                                        value="{{podcast_episode.id}}"><input type="hidden" name="location"
+                                        value="s_podcast_episode"><button type="submit"
+                                        class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{podcast_episode.id}}_s_podcast_episode"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{podcast_episode.id}}_s_podcast_episode"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_album' podcast_episode.id %}"
+                        hx-target="#display_to_albums_{{podcast_episode.id}}_s_podcast_episode" hx-swap="innerHTML"
+                        hx-indicator="#load_new_to_album_{{podcast_episode.id}}_s_podcast_episode"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-vinyl text-light me-2"><span
+                                    class="ms-2">Album</span></i></button></form>
+                </li>
+                <div id="load_new_to_album_{{podcast_episode.id}}_s_podcast_episode" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_albums_{{podcast_episode.id}}_s_podcast_episode">
+
+                </div>
+
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'add_tracks' podcast_episode.id %}"
+                        hx-target="#display_add_podcast_episodes_{{podcast_episode.id}}_s_podcast_episode"
+                        hx-swap="innerHTML"
+                        hx-indicator="#load_new_add_podcast_episodes_{{podcast_episode.id}}_s_podcast_episode"><button
+                            type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-plus-lg text-light me-2"><span class="ms-2">Add</span></i></button></form>
+                </li>
+                <div id="load_new_add_podcast_episodes_{{podcast_episode.id}}_s_podcast_episode"
+                    class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_add_podcast_episodes_{{podcast_episode.id}}_s_podcast_episode">
+
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{podcast_episode.id}}_s_podcast_episode').addEventListener("click",
+            function () {
+                if (document.getElementById('desc_{{podcast_episode.id}}_s_podcast_episode').style.display ===
+                    "none" && document.getElementById('icon_desc_{{podcast_episode.id}}_s_podcast_episode')
+                    .classList.contains("text-light")) {
+                    document.getElementById('desc_{{podcast_episode.id}}_s_podcast_episode').style.display =
+                    "block";
+                    document.getElementById('icon_desc_{{podcast_episode.id}}_s_podcast_episode').classList.remove(
+                        "text-light");
+                    document.getElementById('icon_desc_{{podcast_episode.id}}_s_podcast_episode').classList.add(
+                        "text-warning");
+                } else {
+                    document.getElementById('desc_{{podcast_episode.id}}_s_podcast_episode').style.display = "none";
+                    document.getElementById('icon_desc_{{podcast_episode.id}}_s_podcast_episode').classList.remove(
+                        "text-warning");
+                    document.getElementById('icon_desc_{{podcast_episode.id}}_s_podcast_episode').classList.add(
+                        "text-light");
+                }
+
+            });
+    </script>
+
+
+    <!------------ END EPISODE CARD---------- -->
+</li>
+<div id="load_new_{{podcast_episode.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endfor %}

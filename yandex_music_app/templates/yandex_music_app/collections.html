@@ -1,0 +1,121 @@
+{% load static %}
+{% load template_filters %}
+
+
+<div class=" my-1 d-flex justify-content-center">
+    <ul class="nav nav-pills mb-3 flex-nowrap overflow-x-auto" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <div hx-post="{% url 'client_tracks' %}" hx-target="#pills-Tracks-Profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Tracks-Profile" hx-trigger="load"></div>
+            <a hx-post="{% url 'client_tracks' %}" hx-target="#pills-Tracks-Profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Tracks-Profile" class="active nav-link yellow rounded-pill text-center"
+                id="pills-Tracks-Profile-tab" data-bs-toggle="pill" data-bs-target="#pills-Tracks-Profile" type="button" role="tab"
+                aria-controls="pills-Tracks-Profile" aria-selected="false"><i class="bi bi-music-note">Tracks</i></a>
+            <div id="load_pills-Tracks-Profile" class="htmx-indicator mt-1">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a hx-post="{% url 'client_playlists' %}" hx-target="#pills-Playlists-profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Playlists-profile" class="nav-link yellow rounded-pill text-center"
+                id="pills-Playlists-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-Playlists-profile" type="button"
+                role="tab" aria-controls="pills-Playlists-profile" aria-selected="false"><i
+                    class="bi bi-folder">Playlists</i></a>
+            <div id="load_pills-Playlists-profile" class="htmx-indicator mt-1">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a hx-post="{% url 'client_albums' %}" hx-target="#pills-Albums-profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Albums-profile" class="nav-link yellow rounded-pill text-center" id="pills-Albums-profile-tab"
+                data-bs-toggle="pill" data-bs-target="#pills-Albums-profile" type="button" role="tab"
+                aria-controls="pills-Albums-profile" aria-selected="true"><i class="bi bi-vinyl">Albums</i></a>
+            <div id="load_pills-Albums-profile" class="htmx-indicator mt-1">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a hx-post="{% url 'client_artists' %}" hx-target="#pills-Artists-profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Artists-profile" class="nav-link yellow rounded-pill text-center"
+                id="pills-Artists-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-Artists-profile" type="button" role="tab"
+                aria-controls="pills-Artists-profile" aria-selected="false"><i class="bi bi-mic">Artists</i></a>
+            <div id="load_pills-Artists-profile" class="htmx-indicator mt-1">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <li class="nav-item" role="presentation">
+            <a hx-post="{% url 'client_podcasts' %}" hx-target="#pills-Podcasts-profile" hx-swap="innerHTML"
+                hx-indicator="#load_pills-Podcasts-profile" class="nav-link yellow rounded-pill text-center"
+                id="pills-Podcasts-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-Podcasts-profile" type="button" role="tab"
+                aria-controls="pills-Podcasts-profile" aria-selected="false"><i class="bi bi-headset">Podcasts</i></a>
+            <div id="load_pills-Podcasts-profile" class="htmx-indicator mt-1">
+                <div class="text-center">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+
+
+
+
+<div class="client">
+    <div class="tab-content" id="pills-tabContent" data-bs-theme="dark">
+
+        <div class="tab-pane fade show active" id="pills-Tracks-Profile" role="tabpanel" aria-labelledby="pills-Tracks-Profile-tab"
+            tabindex="0">
+
+
+
+
+        </div>
+
+        <div class="tab-pane fade" id="pills-Playlists-profile" role="tabpanel" aria-labelledby="pills-Playlists-profile-tab"
+            tabindex="0">
+
+
+
+
+        </div>
+
+
+        <div class="tab-pane fade" id="pills-Albums-profile" role="tabpanel" aria-labelledby="pills-Albums-profile-tab" tabindex="0">
+
+
+
+        </div>
+        <div class="tab-pane fade" id="pills-Artists-profile" role="tabpanel" aria-labelledby="pills-Artists-profile-tab" tabindex="0">
+
+
+
+        </div>
+
+        <div class="tab-pane fade" id="pills-Podcasts-profile" role="tabpanel" aria-labelledby="pills-Podcast-tab" tabindex="0">
+
+
+
+
+        </div>
+
+    </div>
+</div>

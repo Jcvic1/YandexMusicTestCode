@@ -1,0 +1,39 @@
+{% load static %}
+{% load template_filters %}
+
+<div id="{{track.id}}" class="overflow-auto search-height" style="transition: opacity 0.5s ease-out;">
+    <div class="d-flex justify-content-center"><button id="btn_{{track.id}}" class="btn w-25 rounded-pill"><i
+                class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <ul style="border-radius: 30px;padding-left: 0;" class="border border-warning">
+
+        <div class="text-center">
+            <h4 class="my-3">
+                {{track.title|title}}
+            </h4>
+            <div class="text-secondary mb-3" style="font-weight: 400;">
+                {% for artist in track.artists %}{% if not forloop.last %}
+                {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ●
+                {{track.duration_ms|to_mins_secs}}
+            </div>
+        </div>
+
+        <div class="ms-1">
+            {{lyrics|linebreaks}}
+        </div>
+
+        <div class="mb-5">
+
+        </div>
+    </ul>
+
+</div>
+
+
+<script>
+    document.getElementById('btn_{{track.id}}').addEventListener('click', () => {
+        document.getElementById('{{track.id}}').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('{{track.id}}').remove();
+        }, 500);
+    });
+</script>

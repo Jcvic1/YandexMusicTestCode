@@ -1,0 +1,71 @@
+{% load static %}
+{% load template_filters %}
+
+<div class="sticky-top" style="z-index: 1050;">
+    {% if messages %}
+    {% for message in messages %}
+
+    <div class="alert {{ message.tags }} alert-dismissible fade show m-0 rounded-pill d-flex align-item-center justify-content-center" role="alert">
+        {{ message }}
+    </div>
+
+    {% endfor %}
+    {% endif %}
+</div>
+
+{% if add_track %}
+
+<div id="add_track_update" hx-swap-oob="true">
+  {% if profile.yandex_music_tracks %}
+  
+   <div class="my-5">
+     <div class="row">
+       {% for yandex_music_track in profile.yandex_music_tracks.all %}
+       <div class="col-sm-12 col-lg-4 my-2">
+         <form hx-post="{% url 'track' yandex_music_track.track_id %}" hx-target="#player_console" hx-indicator="#top_track_{{yandex_music_track.track_id}}" hx-swap="innerHTML">
+         <button type="submit">
+         <div class="d-flex  align-content-center">
+           <div class="mx-3 position-relative">
+             <div id="top_track_{{yandex_music_track.track_id}}" class="htmx-indicator position-absolute top-50 start-50 translate-middle">
+               <div class="text-center my-1">
+                   <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                       <span class="visually-hidden">Loading...</span>
+                   </div>
+               </div>
+           </div>
+           <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{yandex_music_track.avatar_url|replace|extend}}"
+             class="rounded-circle my-auto border border-warning" alt="{{yandex_music_track.avatar_url}}"></div>
+           <div class="flex-grow-1 my-auto" style="text-align: left;">
+             <div class="d-flex"><div class="text-warning">Track</div>  : <div class="ms-1 text-light">{{yandex_music_track.track_name}}</div></div>
+             <div class="d-flex"><div class="text-warning">Artist</div>: <div class="ms-1 text-light">{{yandex_music_track.track_artists}}</div></div>
+             <div>{% if yandex_music_track.explicit_state %}<i class="bi bi-explicit text-warning"></i>{% endif %}</div>
+           </div>
+         </div>
+       </button>
+       </form>
+       {% if delete %}
+       <form class="my-2 d-flex justify-content-center" hx-post="{% url 'add_tracks' yandex_music_track.track_id %}" hx-indicator="#top_track_{{yandex_music_track.track_id}}" hx-swap="none">
+        <input type="hidden" name="delete" value="delete">
+        <button type="submit" class="btn btn-outline-danger rounded-pill w-50 ">Delete</button>
+       </form>
+       {% endif %}
+       </div>
+       {% endfor %}
+     </div>
+
+   </div>
+
+   {% endif %}
+ </div>
+
+{% endif %}
+
+<script>
+  setTimeout(function () {
+  $(".alert")
+    .fadeTo(500, 0)
+    .slideUp(500, function () {
+      $(this).remove();
+    });
+}, 3000);
+</script>

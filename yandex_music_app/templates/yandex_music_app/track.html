@@ -1,0 +1,1375 @@
+{% load static %}
+{% load template_filters %}
+<div id="sm-screen">
+
+  <div id="sm-screenFull" class="d-none">
+
+    <video autoplay loop muted playsinline webkit-playsinline src="{% static 'vids/fallback.mp4' %}"
+      class="mood-vid rounded-5 mx-auto mt-5" type="video/mp4"></video>
+    <div id="playerText" class="text-center position-absolute start-50 translate-middle w-100 d-block"
+      style="top: 33%;">
+      <h4 class="my-3">
+        {{track.title|title}}
+      </h4>
+      <div class="text-secondary mb-3" style="font-weight: 400;">
+        {% for artist in track.artists %}{% if not forloop.last %}
+        {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+      </div>
+    </div>
+    <div class="lyricsText position-absolute top-50 start-50 translate-middle w-100 d-none">
+      <div class="overflow-auto search-height" style="transition: opacity 0.5s ease-out;">
+
+        {% if sync_lyrics and sync_lyrics != "Lyrics Not Found !" %}
+        <div class="sync_lyrics1">
+          {{sync_lyrics|linebreaks}}
+        </div>
+        <div class="text-center">
+          <h4 class="my-3">
+            {{track.title|title}}
+          </h4>
+          <div class="text-secondary mb-2" style="font-weight: 400;">
+            {% for artist in track.artists %}{% if not forloop.last %}
+            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{track.duration_ms|to_mins_secs}}
+          </div>
+        </div>
+
+        <div class="display_sync_lyrics1 mx-1" style="padding-top: 5vh;">
+
+        </div>
+
+        {% else %}
+        <div class="text-center">
+          <h4 class="my-3">
+            {{track.title|title}}
+          </h4>
+          <div class="text-secondary mb-3" style="font-weight: 400;">
+            {% for artist in track.artists %}{% if not forloop.last %}
+            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{track.duration_ms|to_mins_secs}}
+          </div>
+        </div>
+
+        <div class="text-center">
+          {{lyrics|linebreaks}}
+        </div>
+
+        {% endif %}
+
+        <div style="margin-bottom: 30vh;">
+
+        </div>
+
+
+      </div>
+
+
+    </div>
+
+
+
+
+    <div class="mx-auto my-auto mt-4 playerMediumScreen fixed-bottom">
+      <ul class="list-group text-white">
+        <li class="list-group-item step rounded-pill mb-3">
+
+          <div class="d-flex justify-content-center align-items-center">
+            <div id="trackList" class="htmx-indicator my-auto" style="padding-bottom: 5px;">
+              <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+            <div class="">
+              <button id="buttonPlayPrev" onclick="prev()"><i id="buttonPlayPrev_icon"
+                  class="bi bi-skip-backward-fill text-warning my-auto" style="font-size: 30px;"></i></button>
+            </div>
+            <div class="mx-3 position-relative">
+              <div class="player-spinner">
+                {% if track.cover_uri %}
+                <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{track.cover_uri|replace|extend}}"
+                  class="rounded-circle my-auto border border-warning" alt="">{% else %}
+                <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{track.og_image|replace|extend}}"
+                  class="rounded-circle my-auto border border-warning" alt="">{% endif %}
+              </div>
+              <div class="position-absolute top-50 start-50 translate-middle z-2">
+                <button class="toggleButtonPlayPause" onclick="togglePlay()"><i
+                    class="player_btn_icon bi bi-play-fill text-warning my-auto" style="font-size: 35px;"></i></button>
+              </div>
+
+              <div class="spinner-center position-absolute top-50 start-50 translate-middle "></div>
+            </div>
+
+            {% if track_tag == 'radio' and radio_first_track %}
+            <div class="">
+              <button id="buttonPlayNext" onclick="RadioNextSetButton()"><i id="buttonPlayNext_icon"
+                  class="bi bi-skip-forward-fill text-warning my-auto" style="font-size: 30px;"></i></button>
+            </div>
+            {% else %}
+            <div class="">
+              <button id="buttonPlayNext" onclick="next()"><i id="buttonPlayNext_icon"
+                  class="bi bi-skip-forward-fill text-warning my-auto" style="font-size: 30px;"></i></button>
+            </div>
+            {% endif %}
+
+            <div id="trackList" class="htmx-indicator my-auto" style="padding-bottom: 5px;">
+              <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                  <span class="visually-hidden">Loading...</span>
+                </div>
+              </div>
+            </div>
+
+
+          </div>
+          <div class="d-flex my-3 mx-2">
+            <div class="playedTime"> </div>
+            <div class="seekContainerFull mx-auto mt-1"><input class="seekSlider Full" type="range" min="0" value="0"
+                step="1"></div>
+            <div class="trackTime"> </div>
+          </div>
+
+          <div class="d-flex justify-content-between mx-5">
+            <div class="d-flex flex-column my-auto " style="text-align: left;">
+              <div class="text-light" style="font-size: small;">
+                {{track.title}}
+              </div>
+
+              <div class="text-secondary" style="font-weight: 400; font-size: very small;">
+                {% for artist in track.artists %}{% if not forloop.last %}
+                {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+              </div>
+            </div>
+
+            <div class="d-flex ms-2 align-items-center">
+              <form hx-post="{% url 'toggle_like' %}" hx-swap="none" class="likeButtonForm">
+                <div class="likeButton">{% if track.id|striptags in fav_tracks %}<input type="hidden" name="tag"
+                    value="track_dislike">{% else %} <input type="hidden" name="tag" value="track_like">
+                  {% endif %}<input type="hidden" name="id" value="{{track.id}}"><input type="hidden" name="location"
+                    value="player_track"><button type="submit"
+                    class="btn w-100 rounded-pill"><span>{% if track.id|striptags in fav_tracks %}<i
+                        class="bi bi-heart text-warning">{% else %}<i
+                          class="bi bi-heart text-light">{% endif %}</i></span></button></div>
+              </form>
+              {% if track.content_warning %}
+              <div>
+                <i class="bi bi-explicit" style="font-size: small;"></i>
+              </div>
+              {% endif %}
+            </div>
+
+          </div>
+        </li>
+
+        <ul class="list-group text-white">
+          <li class="list-group-item rounded-pill ">
+            <div class="d-flex justify-content-around my-2">
+              {% if track_tag == 'radio' %}<button><i class="bi bi-infinity text-light my-auto"
+                  style="font-size: 15px;"></i></button>{% else %}
+              <button class="toggleButtonShuffle" onclick="shuffle()"><i
+                  class="toggleButtonShuffle_icon bi bi-shuffle text-light my-auto"
+                  style="font-size: 15px;"></i></button>{% endif %}
+              <button class="toggleButtonReapeat"><i class="toggleButtonReapeat_icon bi bi-repeat text-light my-auto"
+                  style="font-size: 15px;"></i></button>
+              <div>
+                <button class="lyricsButton"><i class="lyricsButtonIcon bi bi-body-text text-light"></i></button>
+
+              </div>
+
+              <button class="ButtonDownload" onclick="download()"><i
+                  class="ButtonDownload_icons bi bi-download text-light my-auto" style="font-size: 15px;"></i></button>
+              <button class="toggleButtonSpeed" onclick="changeSpeed()"><i
+                  class="toggleButtonSpeed_icon text-warning my-auto" style="font-size: 15px;">1.0x</i></button>
+            </div>
+          </li>
+
+        </ul>
+      </ul>
+
+
+      <button id="btn_sm-screenFull" class="w-100 my-2 btn_sm-screenFull" onclick="changeScale()"><i
+          class="bi bi-chevron-compact-up text-warning"></i></button>
+    </div>
+
+  </div>
+  <li class="list-group-item step rounded-pill">
+    <div class="seekContainer "><input class="seekSlider" type="range" min="0" value="0" step="1"></div>
+    <div class="d-flex justify-content-between w-100">
+      <div class="d-flex track">
+        <div class="player-spinner">
+          {% if track.cover_uri %}
+          <img style="height: 75px; width: 75px; border-radius: 50%;" src="{{track.cover_uri|replace|extend}}"
+            class="rounded-circle my-auto border border-warning" alt="">{% else %}
+          <img style="height: 75px; width: 75px; border-radius: 50%;" src="{{track.og_image|replace|extend}}"
+            class="rounded-circle my-auto border border-warning" alt="">{% endif %}
+        </div>
+        <div class="player-button my-auto">
+          <button class="toggleButtonPlayPause" onclick="togglePlay()"><i
+              class="player_btn_icon bi bi-play-fill text-warning my-auto" style="font-size: 30px;"></i></button>
+        </div>
+        <div class="spinner-center"></div>
+        <div id="trackList" class="htmx-indicator my-auto ms-2">
+          <div class="text-center">
+            <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div class="my-auto ms-2 " style="text-align: left;">
+          <div class="text-light text-state">
+            {{track.title}}
+          </div>
+          <div class="text-secondary text-state" style="font-weight: 400;">
+            {% for artist in track.artists %}{% if not forloop.last %}
+            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+          </div>
+        </div>
+
+      </div>
+
+      <div class="d-flex align-items-center">
+        <form hx-post="{% url 'toggle_like' %}" hx-swap="none" class="likeButtonForm">
+          <div class="likeButton">{% if track.id|striptags in fav_tracks %}<input type="hidden" name="tag"
+              value="track_dislike">{% else %} <input type="hidden" name="tag" value="track_like"> {% endif %}<input
+              type="hidden" name="id" value="{{track.id}}"><input type="hidden" name="location"
+              value="player_track"><button type="submit"
+              class="btn w-100 rounded-pill"><span>{% if track.id|striptags in fav_tracks %}<i
+                  class="bi bi-heart text-warning">{% else %}<i
+                    class="bi bi-heart text-light">{% endif %}</i></span></button></div>
+        </form>
+        {% if track.content_warning == 'explicit' %}
+        <div class="my-auto ms-1">
+          <i class="bi bi-explicit"></i>
+        </div>
+        {% endif %}
+
+        <div class="ms-2 me-3">
+          <button class="btn_sm-screenFull" onclick="changeScale()"><i id="icon_sm-screenFull"
+              class=" bi bi-three-dots-vertical text-light " style="font-size: 1.7rem;"></i></button>
+        </div>
+      </div>
+    </div>
+
+  </li>
+
+</div>
+
+
+
+
+
+
+
+
+
+
+<div id="lg-screen">
+
+  <div class="lyricsText position-absolute w-100 overflow-auto show-track-desc d-none" style="bottom: 77px;height: 45vh;">
+    <div class="mx-2 mb-5" style="transition: opacity 0.5s ease-out; ">
+      <ul style="border-radius: 30px;padding-left: 0;" class="border border-warning">
+
+        {% if sync_lyrics and sync_lyrics != "Lyrics Not Found !" %}
+        <div class="sync_lyrics2">
+          {{sync_lyrics|linebreaks}}
+        </div>
+        <div class="text-center">
+          <h4 class="my-3">
+            {{track.title|title}}
+          </h4>
+          <div class="text-secondary mb-3" style="font-weight: 400;">
+            {% for artist in track.artists %}{% if not forloop.last %}
+            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{track.duration_ms|to_mins_secs}}
+          </div>
+        </div>
+
+        <div class="display_sync_lyrics2 ">
+
+        </div>
+
+        {% else %}
+
+        <div class="text-center">
+          <h4 class="my-3">
+            {{track.title|title}}
+          </h4>
+          <div class="text-secondary mb-3" style="font-weight: 400;">
+            {% for artist in track.artists %}{% if not forloop.last %}
+            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{track.duration_ms|to_mins_secs}}
+          </div>
+        </div>
+
+        <div class="text-center">
+          {{lyrics|linebreaks}}
+        </div>
+
+        {% endif %}
+
+      </ul>
+
+    </div>
+
+  </div>
+
+  <li class="list-group-item step rounded-pill">
+    <div class="seekContainerLg"><input class="seekSlider Lg" type="range" min="0" value="0" step="1"></div>
+    <div class="d-flex justify-content-between w-100">
+      <div class="d-flex align-items-center ms-2">
+
+        <div id="trackList" class="htmx-indicator my-auto" style="padding-bottom: 5px;">
+          <div class="text-center">
+            <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="">
+          <button id="buttonPlayPrev" onclick="prev()"><i id="buttonPlayPrev_icon"
+              class="bi bi-skip-backward-fill text-warning my-auto" style="font-size: 20px;"></i></button>
+        </div>
+        <div class="mx-3 position-relative">
+          <div class="player-spinner">
+            {% if track.cover_uri %}
+            <img style="height: 75px; width: 75px; border-radius: 50%;" src="{{track.cover_uri|replace|extend}}"
+              class="rounded-circle my-auto border border-warning" alt="">{% else %}
+            <img style="height: 75px; width: 75px; border-radius: 50%;" src="{{track.og_image|replace|extend}}"
+              class="rounded-circle my-auto border border-warning" alt="">{% endif %}
+          </div>
+          <div class="position-absolute top-50 start-50 translate-middle z-2">
+            <button class="toggleButtonPlayPause" onclick="togglePlay()"><i
+                class="player_btn_icon bi bi-play-fill text-warning my-auto" style="font-size: 25px;"></i></button>
+          </div>
+
+          <div class="spinner-center position-absolute top-50 start-50 translate-middle "></div>
+        </div>
+
+        {% if track_tag == 'radio' and radio_first_track %}
+        <div class="">
+          <button id="buttonPlayNext" onclick="RadioNextSetButton()"><i id="buttonPlayNext_icon"
+              class="bi bi-skip-forward-fill text-warning my-auto" style="font-size: 20px;"></i></button>
+        </div>
+        {% else %}
+        <div class="">
+          <button id="buttonPlayNext" onclick="next()"><i id="buttonPlayNext_icon"
+              class="bi bi-skip-forward-fill text-warning my-auto" style="font-size: 20px;"></i></button>
+        </div>
+        {% endif %}
+
+        <div id="trackList" class="htmx-indicator my-auto" style="padding-bottom: 5px;">
+          <div class="text-center">
+            <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+              <span class="visually-hidden">Loading...</span>
+            </div>
+          </div>
+        </div>
+        <div class="d-flex align-items-center">
+          <div class="my-auto ms-3 " style="text-align: left;">
+            <div class="text-light text-state">
+              {{track.title}}
+            </div>
+            <div class="text-secondary text-state" style="font-weight: 400;">
+              {% for artist in track.artists %}{% if not forloop.last %}
+              {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+            </div>
+          </div>
+          <div class=" ms-3">
+            {% if track.content_warning == 'explicit' %}
+            <div class="my-auto">
+              <i class="bi bi-explicit"></i>
+            </div>
+            {% endif %}
+          </div>
+          <form hx-post="{% url 'toggle_like' %}" hx-swap="none" class="likeButtonForm">
+            <div class="likeButton">{% if track.id|striptags in fav_tracks %}<input type="hidden" name="tag"
+                value="track_dislike">{% else %} <input type="hidden" name="tag" value="track_like"> {% endif %}<input
+                type="hidden" name="id" value="{{track.id}}"><input type="hidden" name="location"
+                value="player_track"><button type="submit"
+                class="btn w-100 rounded-pill"><span>{% if track.id|striptags in fav_tracks %}<i
+                    class="bi bi-heart text-warning">{% else %}<i
+                      class="bi bi-heart text-light">{% endif %}</i></span></button></div>
+          </form>
+          <div class="playedTime"></div>
+        </div>
+
+      </div>
+
+      <div class="d-flex align-items-center">
+        <div class="trackTime"> </div>
+        {% if track_tag == 'radio' %}<button class="mx-3"><i class="bi bi-infinity text-light my-auto"
+            style="font-size: 15px;"></i></button>{% else %}<button class="toggleButtonShuffle mx-3"
+          onclick="shuffle()"><i class="toggleButtonShuffle_icon bi bi-shuffle text-light my-auto"
+            style="font-size: 15px;"></i></button>{% endif %}
+        <button class="toggleButtonReapeat mx-3"><i class="toggleButtonReapeat_icon bi bi-repeat text-light my-auto"
+            style="font-size: 15px;"></i></button>
+
+        <button class="lyricsButton mx-3"><i class="lyricsButtonIcon bi bi-body-text text-light"></i></button>
+
+
+
+        <button class="ButtonDownload mx-3" onclick="download()"><i
+            class="ButtonDownload_icons bi bi-download text-light my-auto" style="font-size: 15px;"></i></button>
+        <button class="toggleButtonSpeed mx-3" onclick="changeSpeed()"><i
+            class="toggleButtonSpeed_icon text-warning my-auto" style="font-size: 15px;">1.0x</i></button>
+      </div>
+
+
+    </div>
+
+
+  </li>
+
+</div>
+<div id="trackSetForms" style="display: none;">
+  {% if track_tag == 'radio' %}
+  {% for id in track_list %}
+  {% if forloop.last and radio_first_track %}
+  <form hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList"><input
+      type="hidden" name="tag" value="radio"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% if stations_origin == 'radio_personal_stations' %}<input type="hidden"
+      name="track_type" value="{{track_type}}"><input type="hidden" name="track_type_id"
+      value="{{track_type_id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% elif stations_origin == 'radio_random_stations' %}<input type="hidden"
+      name="track_type" value="track"><input type="hidden" name="track_type_id" value="{{id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% else %}<input
+      type="hidden" name="track_type" value="{{track_type}}"><input type="hidden" name="track_type_id"
+      value="{{id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% endif %}<input class="for_shuffle" type="hidden" name="shuffle" value=""><input type="hidden" name="track_type_first" value="track_type_first"><input
+      type="hidden" name="radio_set" value="radio_set"><input type="hidden" name="stations_origin"
+      value="{{stations_origin}}"><button id="btnRadioNextSet" type="submit"></button></form>
+  {% elif forloop.last %}
+  <form hx-post="{% url 'track' id %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList"><input
+      type="hidden" name="tag" value="radio">{% if stations_origin == 'radio_personal_stations' %}<input type="hidden"
+      name="track_type" value="{{track_type}}"><input type="hidden" name="track_type_id"
+      value="{{track_type_id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% elif stations_origin == 'radio_random_stations' %}<input type="hidden"
+      name="track_type" value="track"><input type="hidden" name="track_type_id" value="{{id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% else %}<input
+      type="hidden" name="track_type" value="{{track_type}}"><input type="hidden" name="track_type_id"
+      value="{{id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% endif %}<input type="hidden" name="radio_set" value="radio_set"><input type="hidden"
+      name="stations_origin" value="{{stations_origin}}"><input type="hidden" name="station_settings2" 
+      value="{{station_settings2}}"><input class="for_shuffle" type="hidden" name="shuffle" value=""><button button id="{{ forloop.counter0 }}"
+      type="submit"></button></form>
+  {% else %}
+  <form hx-post="{% url 'track' id %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList"><input
+      type="hidden" name="tag" value="radio"><input type="hidden" name="track_list"
+      value="{{track_list|convert_to_json}}"><input type="hidden" name="track_type" value="{{track_type}}"><input
+      type="hidden" name="stations_origin" value="{{stations_origin}}"><input type="hidden" name="station_settings2" 
+      value="{{station_settings2}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% if stations_origin != 'None' %}<input
+      type="hidden" name="track_type" value="{{track_type}}"><input type="hidden" name="track_type_id"
+      value="{{track_type_id}}"><input class="for_shuffle" type="hidden" name="shuffle" value="">{% endif %}<button id="{{ forloop.counter0 }}" type="submit"></button></form>
+  {% endif %}
+  {% endfor %}
+  {% else %}
+  {% for id in track_list %}
+  <form hx-post="{% url 'track' id %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList"><input
+      type="hidden" name="tag" value="{{track_tag}}"> <input type="hidden" name="page" value="{{page}}"> <input
+      type="hidden" name="sub_tag" value="{{sub_track_tag}}"> <input type="hidden" name="tagId"
+      value="{{tagId}}"><input class="for_shuffle" type="hidden" name="shuffle" value=""><button id="{{ forloop.counter0 }}" type="submit"></button></form>
+  {% endfor %}
+  <form hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList">
+    <input type="hidden" name="tag" value="radio">
+    {% if track_tag == 'playlist' or sub_track_tag == 'single' %}
+    <input type="hidden" name="track_type" value="track">
+    <input class="for_shuffle" type="hidden" name="shuffle" value="">
+    <input type="hidden" name="track_type_id" value="{{track.id}}">
+    <input type="hidden" name="station_id_for_from" value="track">
+    {% else %}
+    <input type="hidden" name="track_type" value="{{track_tag}}">
+    <input class="for_shuffle" type="hidden" name="shuffle" value="">
+    <input type="hidden" name="track_type_id" value="{{tagId}}">
+    <input type="hidden" name="station_id_for_from" value="{{track_tag}}">
+    {% endif %}
+    <input type="hidden" name="radio_first_track" value="radio_first_track">
+    <input class="for_shuffle" type="hidden" name="shuffle" value="">
+    <button id="startRadiofromTracks" type="submit"></button></form>
+  {% endif %}
+
+
+  {% if foreign_profile %}
+  <form hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList">
+    <input type="hidden" name="foreign_profile" value="{{foreign_profile}}">
+    <input type="hidden" name="foreign_profile_next_track" value="foreign_profile_next_track">
+    <button id="playForeignProfileTrack" type="submit"></button></form>
+    {% endif %}
+
+
+    <div id="check_radio" hx-swap-oob="true">
+      <input type="hidden" name="radio" value="{{track_tag}}">
+    </div>
+</div>
+
+
+<div style="display: none;">
+  <audio id="audioPlayer">
+    <source src="{{url}}" type="audio/mp3">
+
+  </audio>
+</div>
+
+
+
+
+
+
+<script src="{% static 'js/id3writer.min.js' %}"></script>
+
+
+
+<script>
+  var audioPlayer = document.getElementById("audioPlayer");
+  var toggleButtons = document.querySelectorAll(".toggleButtonPlayPause");
+  var spinners = document.querySelectorAll(".player-spinner");
+  var seekSliders = document.querySelectorAll(".seekSlider");
+  var playerButtons = document.querySelectorAll(".player_btn_icon");
+  var prevButtons = document.querySelectorAll(".buttonPlayPrev");
+  var nextButtons = document.querySelectorAll(".buttonPlayNext");
+  var shuffleButtons = document.querySelectorAll(".toggleButtonShuffle");
+  var repeatButtons = document.querySelectorAll(".toggleButtonReapeat");
+  var downloadButtons = document.querySelectorAll(".buttonDownload");
+  var ButtonDownload_icons = document.querySelectorAll(".ButtonDownload_icons");
+  var speedButtons = document.querySelectorAll(".toggleButtonSpeed");
+  var speedButtonIcons = document.querySelectorAll(".toggleButtonSpeed_icon");
+  var shuffleButtonIcons = document.querySelectorAll(".toggleButtonShuffle_icon");
+  var repeatButtonIcons = document.querySelectorAll(".toggleButtonReapeat_icon");
+  var trackTimes = document.querySelectorAll('.trackTime');
+  var playedTimes = document.querySelectorAll('.playedTime');
+  var likeButtonForms = document.querySelectorAll('.likeButtonForm');
+  var lyricsButtons = document.querySelectorAll('.lyricsButton');
+  var lyricsButtonIcons = document.querySelectorAll('.lyricsButtonIcon');
+  var likeButtons = document.querySelectorAll('.likeButton');
+  var lyricsTexts = document.querySelectorAll('.lyricsText');
+  var playerText = document.getElementById('playerText');
+  var newTrackss = document.querySelectorAll('.newTracks');
+  var smFull = document.getElementById('sm-screenFull');
+  var btnSmFull = document.querySelector('#btn_sm-screenFull');
+  var iconSmFull = document.querySelector('#icon_sm-screenFull');
+  var for_shuffle = document.querySelectorAll('.for_shuffle');
+  var trackIds = {{track_list|safe}};
+  var last_set = '{{last_set}}';
+  var track_tag = '{{track_tag}}';
+  var sub_track_tag = '{{sub_track_tag}}';
+  var foreign_profile = '{{foreign_profile}}'
+  var btnRadioNextSet = document.getElementById('btnRadioNextSet');
+  var formRadioNextSet = document.getElementById('formRadioNextSet');
+  var trackSetForms = document.getElementById('trackSetForms');
+  var startRadiofromTracks = document.getElementById('startRadiofromTracks');
+  var playForeignProfileTrack = document.getElementById('playForeignProfileTrack');
+  var radio_played_history = []
+  var currentIndex = 0;
+  var isShuffle = false;
+  var first_track = false;
+  var repeatState = 0;
+  var speed = 1.0;
+  var rotationAngle = 0;
+  var lastRender = 0;
+
+  
+
+
+
+
+  var storedIsShuffle = JSON.parse(sessionStorage.getItem('isShuffle'));
+  if (storedIsShuffle) {
+    isShuffle = storedIsShuffle;
+    if (isShuffle === true) {
+      shuffleButtonIcons.forEach(shuffleButtonIcon => {
+        shuffleButtonIcon.classList.remove("text-light");
+        shuffleButtonIcon.classList.add("text-warning");
+      });
+      for_shuffle.forEach(for_shuffle => {
+        for_shuffle.value = "shuffle";
+      });
+    }
+  }
+
+
+  var storedRepeatState = JSON.parse(sessionStorage.getItem('repeatState'));
+  if (storedRepeatState) {
+    repeatState = storedRepeatState;
+    switch (repeatState) {
+      case 0:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.remove("active"));
+        audioPlayer.removeAttribute("loop");
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-infinity", "text-warning");
+          repeatButtonIcon.classList.add("bi-repeat", "text-light");
+        });
+        break;
+      case 1:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        audioPlayer.removeAttribute("loop");
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat", "text-light");
+          repeatButtonIcon.classList.add("bi-repeat", "text-warning");
+        });
+        break;
+      case 2:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        audioPlayer.setAttribute("loop", true);
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat", "text-light");
+          repeatButtonIcon.classList.add("bi-repeat-1", "text-warning");
+        });
+        break;
+      case 3:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat", "text-light");
+          repeatButtonIcon.classList.add("bi-infinity", "text-warning");
+        });
+        break;
+    }
+  }
+
+
+
+  var StoredLyricsDisplay = sessionStorage.getItem('lyricsDisplay');
+  var StoredLyricsButtonIcons = sessionStorage.getItem('lyricsButtonIcon');
+  if (StoredLyricsDisplay && StoredLyricsButtonIcons) {
+
+    if (StoredLyricsDisplay === 'd-none') {
+      playerText.classList.remove("d-none");
+      playerText.classList.add("d-block");
+    } else {
+      playerText.classList.remove("d-block");
+      playerText.classList.add("d-none");
+    }
+
+
+    lyricsTexts.forEach(lyricsText => {
+      lyricsText.classList.remove("d-none");
+      lyricsText.classList.add(StoredLyricsDisplay);
+
+    });
+    lyricsButtonIcons.forEach(lyricsButtonIcon => {
+      lyricsButtonIcon.classList.remove("text-light");
+      lyricsButtonIcon.classList.add(StoredLyricsButtonIcons);
+    });
+  }
+
+  var storedSpeed = JSON.parse(sessionStorage.getItem('speed'));
+  if (storedSpeed) {
+    speed = storedSpeed;
+    audioPlayer.playbackRate = speed;
+    speedButtonIcons.forEach(speedButtonIcon => {
+      if (speed == 1.0) {
+        speedButtonIcon.innerHTML = "1.0x";
+      } else if (speed == 1.5) {
+        speedButtonIcon.innerHTML = "1.5x";
+      } else if (speed == 2.0) {
+        speedButtonIcon.innerHTML = "2.0x";
+      } else if (speed == 0.5) {
+        speedButtonIcon.innerHTML = "0.5x";
+      } else {
+        speedButtonIcon.innerHTML = "0.75x";
+      }
+    });
+  }
+
+
+
+  if (last_set === 'true' && (repeatState === 0 || repeatState === 3)) {
+    trackIds.pop();
+
+  }
+
+
+  function getCurrentIndex(trackIds, id) {
+    for (var i = 0; i < trackIds.length; i++) {
+      if (trackIds[i] === id) {
+        return i;
+      }
+    }
+    return null;
+  }
+
+  currentTrackId = '{{track.id}}';
+
+  var currentIndex = getCurrentIndex(trackIds, currentTrackId);
+
+
+
+  if (last_set === 'true' && repeatState === 3) {
+
+    var last_track_id = trackIds[trackIds.length - 1];
+    if (trackIds.indexOf(last_track_id) === currentIndex) {
+      var marginOfError = 10;
+      var remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+      if (remainingTime <= marginOfError && repeatState !== 2) {
+
+        startRadiofromTracks.click();
+
+
+      } else {
+        audioPlayer.addEventListener('timeupdate', function () {
+          remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+          if (remainingTime <= marginOfError && repeatState !== 2) {
+
+            startRadiofromTracks.click();
+
+
+            audioPlayer.removeEventListener('timeupdate', arguments.callee);
+          }
+        });
+      }
+
+    }
+  }
+
+
+  if (last_set === 'true') {
+    var first_track_id = trackIds[trackIds.length - 1];
+    if (trackIds.indexOf(first_track_id) === currentIndex) {
+      first_track = true
+
+    }
+
+  }
+
+  if (audioPlayer) {
+    toggleButtons.forEach(toggleButton => toggleButton.click()); 
+    {% if stored_track %}
+    audioPlayer.autoplay = false; 
+    {% else %}
+    audioPlayer.autoplay = true; 
+    {% endif %}
+
+
+  }
+
+
+
+  if (audioPlayer) {
+    var marginOfError = 7.5;
+    var remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+    if (remainingTime <= marginOfError && repeatState !== 2 && first_track === false) {
+      next();
+    } else {
+      audioPlayer.addEventListener('timeupdate', function () {
+        remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+        if (remainingTime <= marginOfError && repeatState !== 2 && first_track === false) {
+          next();
+          audioPlayer.removeEventListener('timeupdate', arguments.callee);
+        }
+      });
+    }
+  }
+
+  
+  if (foreign_profile !== 'None') {
+    var marginOfError = 7.5;
+    var remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+    if (remainingTime <= marginOfError && repeatState !== 2 && first_track === false) {
+      playForeignProfileTrack.click();
+    } else {
+      audioPlayer.addEventListener('timeupdate', function () {
+        remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+        if (remainingTime <= marginOfError && repeatState !== 2 && first_track === false) {
+          playForeignProfileTrack.click();
+          audioPlayer.removeEventListener('timeupdate', arguments.callee);
+        }
+      });
+    }
+  }
+
+
+  function togglePlay() {
+
+    if (audioPlayer.paused) {
+      var playPromise = audioPlayer.play();
+      if (playPromise !== undefined) {
+        playPromise.then(_ => {
+          playerButtons.forEach(button => button.classList.remove("bi-play-fill"));
+          playerButtons.forEach(button => button.classList.add("bi-pause-fill"));
+          spinners.forEach(spinner => spinner.classList.add("spin"));
+          spinners.forEach(spinner => spinner.style.animationPlayState = "running");
+          requestAnimationFrame(animate);
+
+        }).catch(error => {
+          if (error.code === DOMException.ABORT_ERR) {
+            return;
+          }
+          throw error;
+        });
+      }
+    } else {
+      audioPlayer.pause();
+      playerButtons.forEach(button => button.classList.remove("bi-pause-fill"));
+      playerButtons.forEach(button => button.classList.add("bi-play-fill"));
+      spinners.forEach(spinner => spinner.style.animationPlayState = "paused");
+      spinners.forEach(spinner => spinner.classList.remove("spin"));
+    }
+  }
+
+
+
+
+  if (audioPlayer) {
+    audioPlayer.addEventListener("ended", function () {
+      playerButtons.forEach(button => button.classList.remove("bi-pause-fill"));
+      playerButtons.forEach(button => button.classList.add("bi-play-fill"));
+      spinners.forEach(spinner => spinner.style.animationPlayState = "paused");
+      spinners.forEach(spinner => spinner.classList.remove("spin"));
+    });
+  }
+
+
+
+
+  if (audioPlayer) {
+    audioPlayer.addEventListener("loadedmetadata", function () {
+      seekSliders.forEach(seekSlider => seekSlider.max = audioPlayer.duration);
+    });
+  }
+
+  function updateSeekBar() {
+    seekSliders.forEach(seekSlider => seekSlider.value = audioPlayer.currentTime);
+  }
+
+  seekSliders.forEach(seekSlider => seekSlider.addEventListener("input", function () {
+    audioPlayer.currentTime = seekSlider.value;
+  }));
+
+  setInterval(updateSeekBar, 1000);
+
+  function animate(timestamp) {
+    var timeElapsed = timestamp - lastRender;
+    lastRender = timestamp;
+    rotationAngle += (360 * timeElapsed) / 2000;
+    spinners.forEach(spinner => spinner.style.transform = "rotate(" + rotationAngle + "deg)");
+    if (spinners[0].classList.contains("spin") || spinners[1].classList.contains("spin") || spinners[2].classList
+      .contains("spin")) {
+      requestAnimationFrame(animate);
+    }
+  }
+
+  function next() {
+    if (isShuffle) {
+      currentIndex = Math.floor(Math.random() * trackIds.length);
+    } else {
+      currentIndex++;
+      if (currentIndex >= trackIds.length && repeatState !== 0) {
+        if ((track_tag === 'album' || sub_track_tag === 'single') && repeatState === 3) {
+          startRadiofromTracks.click();
+        } 
+        else  {
+          currentIndex = 0;
+        }
+      }
+    }
+
+    if (foreign_profile !== 'None') {
+      playForeignProfileTrack.click();
+    }
+
+    var next_track = document.getElementById(`${currentIndex}`);
+    if (next_track) {
+      next_track.click();
+    }
+  }
+
+  function prev() {
+    if (isShuffle) {
+      currentIndex = Math.floor(Math.random() * trackIds.length);
+    } else {
+      currentIndex--;
+      if (currentIndex < 0) {
+        currentIndex = trackIds.length - 1;
+      }
+    }
+    var prev_track = document.getElementById(`${currentIndex}`);
+    if (prev_track) {
+      prev_track.click();
+    }
+  }
+
+
+
+
+
+  function shuffle() {
+    if (isShuffle) {
+      isShuffle = false;
+      sessionStorage.setItem('isShuffle', JSON.stringify(isShuffle));
+      shuffleButtonIcons.forEach(shuffleButtonIcon => {
+        shuffleButtonIcon.classList.remove("text-warning");
+        shuffleButtonIcon.classList.add("text-light");
+      });
+    } else {
+      isShuffle = true;
+      sessionStorage.setItem('isShuffle', JSON.stringify(isShuffle));
+      shuffleButtonIcons.forEach(shuffleButtonIcon => {
+        shuffleButtonIcon.classList.remove("text-light");
+        shuffleButtonIcon.classList.add("text-warning");
+      });
+    }
+  }
+
+
+
+
+
+
+  function handleRepeat() {
+    repeatState++;
+    if (repeatState > 3) {
+      repeatState = 0;
+    }
+    sessionStorage.setItem('repeatState', JSON.stringify(repeatState));
+
+    switch (repeatState) {
+      case 0:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.remove("active"));
+        audioPlayer.removeAttribute("loop");
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-infinity", "text-warning");
+          repeatButtonIcon.classList.add("bi-repeat", "text-light");
+        });
+        break;
+      case 1:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        audioPlayer.removeAttribute("loop");
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat", "text-light");
+          repeatButtonIcon.classList.add("bi-repeat", "text-warning");
+        });
+        break;
+      case 2:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        audioPlayer.setAttribute("loop", true);
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat");
+          repeatButtonIcon.classList.add("bi-repeat-1");
+        });
+        break;
+      case 3:
+        repeatButtons.forEach(repeatButton => repeatButton.classList.add("active"));
+        audioPlayer.removeAttribute("loop");
+        repeatButtonIcons.forEach(repeatButtonIcon => {
+          repeatButtonIcon.classList.remove("bi-repeat-1");
+          repeatButtonIcon.classList.add("bi-infinity");
+        });
+        break;
+    }
+  }
+
+  repeatButtons.forEach(repeatButton => repeatButton.addEventListener("click", handleRepeat));
+
+
+  function download() {
+    ButtonDownload_icons.forEach(ButtonDownload_icon => {
+      ButtonDownload_icon.classList.remove("text-light");
+      ButtonDownload_icon.classList.add("text-warning");
+    });
+    const xhr = new XMLHttpRequest();
+    xhr.open("GET", "{{url}}", true);
+    xhr.responseType = "blob";
+    xhr.onload = function () {
+      const url = window.URL.createObjectURL(xhr.response);
+      const a = document.createElement("a");
+      a.style.display = "none";
+      a.href = url;
+      a.download = "{{track.title}}.mp3";
+      document.body.appendChild(a);
+
+      const fileReader = new FileReader();
+      fileReader.onload = function () {
+        const writer = new ID3Writer(fileReader.result);
+        writer.setFrame(`TIT2`, `{{track.title}}`)
+          .setFrame(`TPE1`, [
+            `{% for artist in track.artists %}{% if not forloop.last %}{{artist.name}}, {% else %}{{artist.name}}{% endif %}{% endfor %}`
+          ])
+          .setFrame(`TALB`, `{% for album in track.albums %}{{album.title}}{% endfor %}`)
+          .setFrame(`TYER`, `{% for album in track.albums %}{{album.year}}{% endfor %}`)
+          .setFrame(`TRCK`, `{% for album in track.albums %}{{album.track_position.index}}{% endfor %}`)
+          .setFrame(`TCON`, [`{% for album in track.albums %}{{album.genre}}{% endfor %}`]);
+        fetch(`{{track.cover_uri|replace|extend}}`)
+          .then(response => response.arrayBuffer())
+          .then(arrayBuffer => {
+            const pictureType = 'image/jpeg';
+            writer.setFrame('APIC', {
+              type: 3,
+              data: arrayBuffer,
+              description: `{{track.title}}`,
+              mimeType: pictureType
+            });
+            writer.addTag();
+            const taggedFile = writer.getBlob();
+            const taggedUrl = window.URL.createObjectURL(taggedFile);
+            const taggedA = document.createElement("a");
+            taggedA.style.display = "none";
+            taggedA.href = taggedUrl;
+            taggedA.download = "{{track.title}}.mp3";
+            document.body.appendChild(taggedA);
+            taggedA.click();
+            window.URL.revokeObjectURL(taggedUrl);
+          });
+      };
+      fileReader.readAsArrayBuffer(xhr.response);
+      window.URL.revokeObjectURL(url);
+      setTimeout(function () {
+        ButtonDownload_icons.forEach(ButtonDownload_icon => {
+          ButtonDownload_icon.classList.remove("text-warning");
+          ButtonDownload_icon.classList.add("text-light");
+        });
+      }, 2000);
+
+    };
+    xhr.send();
+
+  }
+
+
+
+
+  function changeSpeed() {
+    if (speed == 1.0) {
+      speed = 1.5;
+      sessionStorage.setItem('speed', JSON.stringify(speed));
+      speedButtonIcons.forEach(speedButtonIcon => speedButtonIcon.innerHTML = "1.5x");
+    } else if (speed == 1.5) {
+      speed = 2.0;
+      sessionStorage.setItem('speed', JSON.stringify(speed));
+      speedButtonIcons.forEach(speedButtonIcon => speedButtonIcon.innerHTML = "2.0x");
+    } else if (speed == 2.0) {
+      speed = 0.5;
+      sessionStorage.setItem('speed', JSON.stringify(speed));
+      speedButtonIcons.forEach(speedButtonIcon => speedButtonIcon.innerHTML = "0.5x");
+    } else if (speed == 0.5) {
+      speed = 0.75;
+      sessionStorage.setItem('speed', JSON.stringify(speed));
+      speedButtonIcons.forEach(speedButtonIcon => speedButtonIcon.innerHTML = "0.75x");
+    } else {
+      speed = 1.0;
+      sessionStorage.setItem('speed', JSON.stringify(speed));
+      speedButtonIcons.forEach(speedButtonIcon => speedButtonIcon.innerHTML = "1.0x");
+    }
+    audioPlayer.playbackRate = speed;
+  }
+
+
+  if (audioPlayer) {
+    audioPlayer.addEventListener("timeupdate", function () {
+      var duration = audioPlayer.duration;
+      if (isNaN(duration)) {
+        duration = '';
+      }
+      var currentTime = audioPlayer.currentTime;
+      var timeElapsed = Math.floor(currentTime);
+      var timeRemaining = Math.floor(duration - currentTime);
+      playedTimes.forEach(playedTime => playedTime.textContent = formatTime(timeElapsed));
+      trackTimes.forEach(trackTime => trackTime.textContent = formatTime(timeRemaining));
+    });
+  }
+
+  function formatTime(seconds) {
+    var min = Math.floor(seconds / 60);
+    var sec = Math.floor(seconds % 60);
+    return `${min < 10 ? '0' : ''}${min}:${sec < 10 ? '0' : ''}${sec}`;
+  }
+
+
+
+  likeButtonForms.forEach(likeButtonForm => likeButtonForm.addEventListener('htmx:afterRequest', function (event) {
+
+    if (event.detail.elt.classList.contains('likeButtonForm')) {
+
+      likeButtons.forEach(likeButton => likeButton.innerHTML = event.detail.xhr.response);
+    }
+  }));
+
+
+  lyricsButtons.forEach(lyricsButton => lyricsButton.addEventListener('click', function () {
+    lyricsTexts.forEach(lyricsText => {
+      if (lyricsText.classList.contains("d-none")) {
+
+        lyricsText.classList.remove("d-none");
+        lyricsText.classList.add("d-block");
+
+        lyricsButtonIcons.forEach(lyricsButtonIcon => {
+          lyricsButtonIcon.classList.remove("text-light");
+          lyricsButtonIcon.classList.add("text-warning");
+        });
+
+        playerText.classList.remove("d-block");
+        playerText.classList.add("d-none");
+
+        sessionStorage.setItem('lyricsDisplay', 'd-block');
+        sessionStorage.setItem('lyricsButtonIcon', 'text-warning');
+
+
+      } else {
+
+        lyricsText.classList.remove("d-block");
+        lyricsText.classList.add("d-none");
+
+        lyricsButtonIcons.forEach(lyricsButtonIcon => {
+          lyricsButtonIcon.classList.remove("text-warning");
+          lyricsButtonIcon.classList.add("text-light");
+        });
+
+        playerText.classList.remove("d-none");
+        playerText.classList.add("d-block");
+
+        sessionStorage.setItem('lyricsDisplay', 'd-none');
+        sessionStorage.setItem('lyricsButtonIcon', 'text-light');
+      }
+    });
+  }));
+
+
+
+
+
+
+  {% if sync_lyrics and sync_lyrics != "Lyrics Not Found !" %}
+
+  // Get the lyrics elements
+  var sync_lyrics1 = document.querySelector(".sync_lyrics1");
+  var sync_lyrics2 = document.querySelector(".sync_lyrics2");
+
+  // Get the display elements
+  var display_sync_lyrics1 = document.querySelector(".display_sync_lyrics1");
+  var display_sync_lyrics2 = document.querySelector(".display_sync_lyrics2");
+
+  // Hide all text initially
+  sync_lyrics1.style.display = "none";
+  sync_lyrics2.style.display = "none";
+
+  // Add text lines to the DOM for each display
+  var textLines1 = [];
+  var textLines2 = [];
+  for (var i = 0; i < 7; i++) {
+    textLines1[i] = document.createElement("div");
+    textLines1[i].classList.add("sync-lyrics-text-line");
+    display_sync_lyrics1.appendChild(textLines1[i]);
+  }
+  for (var i = 0; i < 3; i++) {
+    textLines2[i] = document.createElement("div");
+    textLines2[i].classList.add("sync-lyrics-text-line");
+    display_sync_lyrics2.appendChild(textLines2[i]);
+  }
+  // Update the text lines when the audio time changes
+  audioPlayer.addEventListener("timeupdate", function () {
+    // Find the current line index
+    var lines1 = sync_lyrics1.getElementsByTagName("p")[0].innerHTML.split("<br>");
+    var lines2 = sync_lyrics2.getElementsByTagName("p")[0].innerHTML.split("<br>");
+    var currentLine1 = 0;
+    var currentLine2 = 0;
+
+    for (var i = 0; i < lines1.length; i++) {
+      var lineTime = lines1[i].substring(1, 9);
+      var lineSeconds = convertTimeToSeconds(lineTime);
+      if (this.currentTime >= lineSeconds) {
+        currentLine1 = i;
+      }
+    }
+
+    for (var i = 0; i < lines2.length; i++) {
+      var lineTime = lines2[i].substring(1, 9);
+      var lineSeconds = convertTimeToSeconds(lineTime);
+      if (this.currentTime >= lineSeconds) {
+        currentLine2 = i;
+      }
+    }
+
+    // Update the text lines for display 1
+    for (var i = 0; i < 7; i++) {
+      var lineIndex = currentLine1 - 3 + i;
+      if (lineIndex >= 0 && lineIndex < lines1.length) {
+        textLines1[i].style.opacity = "1";
+        textLines1[i].style.color = (i === 3) ? "yellow" : "grey";
+        textLines1[i].style.fontSize = (i === 3) ? "20px" : "15px";
+        textLines1[i].innerHTML = lines1[lineIndex].substring(10);
+      } else {
+        textLines1[i].style.opacity = "0";
+      }
+    }
+
+    // Update the text lines for display 2
+    for (var i = 0; i < 3; i++) {
+      var lineIndex = currentLine2 - 1 + i;
+      if (lineIndex >= 0 && lineIndex < lines2.length) {
+        textLines2[i].style.opacity = "1";
+        textLines2[i].style.color = (i === 1) ? "yellow" : "grey";
+        textLines2[i].style.fontSize = (i === 1) ? "20px" : "15px";
+        textLines2[i].innerHTML = lines2[lineIndex].substring(10);
+      } else {
+        textLines2[i].style.opacity = "0";
+      }
+    }
+
+
+    // Helper function to convert the time format to seconds
+    function convertTimeToSeconds(time) {
+      var minutes = parseInt(time.substring(0, 2));
+      var seconds = parseInt(time.substring(3, 5));
+      var milliseconds = parseInt(time.substring(6, 8));
+      return minutes * 60 + seconds + milliseconds / 100;
+    }
+  });
+
+  {% endif %}
+
+
+
+
+
+  var scale = 'none'
+
+  var storedscale = JSON.parse(sessionStorage.getItem('scale'));
+  if (storedscale) {
+    scale = storedscale;
+    if (scale == 'none') {
+      smFull.classList.remove("fixed-bottom");
+      smFull.classList.remove("playerFullScreen");
+      smFull.classList.add("d-none");
+    } else if (scale == 'medium') {
+      smFull.classList.remove("d-none");
+      smFull.classList.add("fixed-bottom");
+
+    } else {
+      smFull.classList.remove("d-none");
+      smFull.classList.add("fixed-bottom");
+      smFull.classList.add("playerFullScreen");
+      iconSmFull.classList.remove("text-warning");
+      iconSmFull.classList.add("text-light");
+
+    }
+
+  }
+
+
+
+  function changeScale() {
+    if (scale == 'none') {
+      scale = 'medium';
+      sessionStorage.setItem('scale', JSON.stringify(scale));
+      smFull.classList.remove("d-none");
+      smFull.classList.add("fixed-bottom");
+      iconSmFull.classList.remove("text-light");
+      iconSmFull.classList.add("text-warning");
+    } else if (scale == 'medium') {
+      scale = 'large';
+      sessionStorage.setItem('scale', JSON.stringify(scale));
+      smFull.classList.add("playerFullScreen");
+
+    } else {
+      scale = 'none';
+      sessionStorage.setItem('scale', JSON.stringify(scale));
+      smFull.classList.remove("fixed-bottom");
+      smFull.classList.remove("playerFullScreen");
+      smFull.classList.add("d-none");
+      iconSmFull.classList.remove("text-warning");
+      iconSmFull.classList.add("text-light");
+
+    }
+
+  }
+
+
+  
+  {% if track_tag == "radio" %}
+    if (audioPlayer) {
+      audioPlayer.addEventListener("playing", function () {
+        syncPlay();
+      });
+
+      audioPlayer.addEventListener("pause", function () {
+        syncPause();
+      });
+    }
+  {% else %}
+
+    resetBackRadio();
+    
+  {% endif %}
+
+
+
+
+
+
+  {% if radio_first_track or track_type_first %}
+
+  if (audioPlayer) {
+    var marginOfError = 10;
+    var remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+    if (remainingTime <= marginOfError && repeatState !== 2) {
+
+      RadioNextSetButton();
+
+
+    } else {
+      audioPlayer.addEventListener('timeupdate', function () {
+        remainingTime = audioPlayer.duration - audioPlayer.currentTime;
+
+        if (remainingTime <= marginOfError && repeatState !== 2) {
+
+          RadioNextSetButton();
+
+
+          audioPlayer.removeEventListener('timeupdate', arguments.callee);
+        }
+      });
+    }
+  }
+
+  {% endif %}
+
+  function RadioNextSetButton() {
+    btnRadioNextSet.click();
+  }
+
+  var skipTime = 10;
+
+  function handleSeek(details) {
+    switch (details.action) {
+      case "seekforward":
+        audioPlayer.currentTime = Math.min(
+          audioPlayer.currentTime + skipTime,
+          audioPlayer.duration
+        );
+        break;
+      case "seekbackward":
+        audioPlayer.currentTime = Math.max(audioPlayer.currentTime - skipTime, 0);
+        break;
+    }
+  }
+
+  if ('mediaSession' in navigator) {
+
+    navigator.mediaSession.metadata = new MediaMetadata({
+      title: `{{track.title|safe}}`,
+      artist: [
+        `{% for artist in track.artists %}{% if not forloop.last %}{{artist.name|safe}}, {% else %}{{artist.name|safe}}{% endif %}{% endfor %}`
+      ],
+      album: [`{% for album in track.albums %}{{album.genre}}{% endfor %}`],
+      artwork: [{
+        src: '{{track.cover_uri|replace|extend}}',
+        sizes: '400x400',
+        type: 'image/jpeg'
+      }],
+    });
+
+    navigator.mediaSession.setActionHandler('play', function () {
+      togglePlay()
+    });
+    navigator.mediaSession.setActionHandler('pause', function () {
+      togglePlay()
+    });
+    navigator.mediaSession.setActionHandler('previoustrack', function () {
+      prev()
+    });
+    navigator.mediaSession.setActionHandler('nexttrack', function () {
+      next()
+    });
+    navigator.mediaSession.setActionHandler("seekforward", handleSeek);
+    navigator.mediaSession.setActionHandler("seekbackward", handleSeek);
+    navigator.mediaSession.setActionHandler("seekto", function (details) {
+      audioPlayer.currentTime = details.seekTime;
+    });
+
+  }
+</script>

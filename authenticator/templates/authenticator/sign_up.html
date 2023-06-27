@@ -1,0 +1,122 @@
+{% extends 'yandex_music_app/base.html' %} {% load static %} {% load static %} {% block title %}Sign Up{% endblock %}{% block content %}
+
+{% if form.errors %}
+<div class="alert alert-warning alert-dismissible fade show" role="alert">
+    There Was An Error With Your Form!
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+
+{% endif %}
+<div class="container">
+    <div class="d-flex flex-column-reverse flex-lg-row-reverse">
+        <div class=" justify-content-center align-items-center p-2">
+
+            <div class="text-center">
+                <p class="text-light bg-dark rounded my-4 p-2 w-100 ">SIGN UP</p>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+
+                <p>
+                    <label for="id_username">Username:</label>
+                    <input type="text" name="username" maxlength="150" autofocus class="form-control rounded-pill" required
+                        id="id_username">
+
+                    <span class="helptext">
+                        <ul>
+                            <li>Required.</li>
+                            <li>Case sensitive.</li>
+                        </ul>
+                    </span>
+                </p>
+
+
+                <p>
+                    <label for="id_first_name">First name:</label>
+                    <input type="text" name="first_name" class="form-control rounded-pill" maxlength="50" required
+                        id="id_first_name">
+                </p>
+
+
+                <p>
+                    <label for="id_last_name">Last name:</label>
+                    <input type="text" name="last_name" class="form-control rounded-pill" maxlength="50" required id="id_last_name">
+                </p>
+
+
+                <p>
+                    <label for="id_email">Email:</label>
+                    <input type="email" name="email" class="form-control rounded-pill" required id="id_email">
+                </p>
+
+
+                <p>
+                    <label for="id_password1">Password:</label>
+                    
+                    <div class="input-group bg-light border rounded-pill">
+                        <input type="password" name="password1" autocomplete="new-password" class="form-control rounded-pill" required
+                    id="id_password1">
+                        <span class="input-group-append my-auto me-3"><i class="bi bi-eye-slash text-dark eye"
+                                id="mcsu-togglePassword1"></i></span>
+                    </div>
+
+                    <span class="helptext">
+                        <ul>
+                            <li>Your password can’t be too similar to your other personal information.</li>
+                            <li>Your password must contain at least 8 characters.</li>
+                            <li>Your password can’t be a commonly used password.</li>
+                            <li>Your password can’t be entirely numeric.</li>
+                        </ul>
+                    </span>
+                </p>
+
+
+                <p>
+                    <label for="id_password2">Password confirmation:</label>
+                    <div class="input-group bg-light border rounded-pill">
+                        <input type="password" name="password2" autocomplete="new-password" class="form-control rounded-pill" required
+                    id="id_password2">
+                        <span class="input-group-append my-auto me-3"><i class="bi bi-eye-slash text-dark "
+                                id="mcsu-togglePassword2"></i></span>
+                    </div>
+
+                    <span class="helptext">Enter the same password as before, for verification.</span>
+                </p>
+
+                <div class="d-flex justify-content-center"><button type="submit"
+                        class="btn btn-secondary w-75 rounded-pill">Sign Up</button></div>
+        </div>
+        <div class="m-auto align-self-center p-2"><span class=" text-warning fw-bolder fst-italic text-nowrap display-4 m-auto ms-2"><span
+            style="font-size: 10rem;" ><i class="bi bi-people-fill text-warning"></i></span>YM</div>
+    </div>
+</div>
+
+
+
+<script>
+    const mcsu_togglePassword1 = document.querySelector("#mcsu-togglePassword1");
+    const mcsu_togglePassword2 = document.querySelector("#mcsu-togglePassword2");
+    const mcsu_password1 = document.querySelector("#id_password1");
+    const mcsu_password2 = document.querySelector("#id_password2");
+
+    mcsu_togglePassword1.addEventListener("click", function () {
+        // toggle the type attribute
+        const type = mcsu_password1.getAttribute("type") === "password" ? "text" : "password";
+        mcsu_password1.setAttribute("type", type);
+        
+        // toggle the icon
+        this.classList.toggle("bi-eye");
+    });
+
+    mcsu_togglePassword2.addEventListener("click", function () {
+        // toggle the type attribute
+        const type = mcsu_password2.getAttribute("type") === "password" ? "text" : "password";
+        mcsu_password2.setAttribute("type", type);
+        
+        // toggle the icon
+        this.classList.toggle("bi-eye");
+    });
+</script>
+
+
+{% endblock %}

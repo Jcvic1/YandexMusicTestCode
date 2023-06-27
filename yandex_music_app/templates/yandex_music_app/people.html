@@ -1,0 +1,645 @@
+{% load static %}
+{% load template_filters %}
+
+{% if tag_type == 'people' %}
+
+{% if user_profile in profile.follow.all %}
+<form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{tag}}" hx-swap="innerHTML">
+  {% csrf_token %}
+  <input type="hidden" name="tag" value="{{tag}}">
+  <input type="hidden" name="tag_type" value="people">
+  <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+    Unfollow
+  </button>
+</form>
+{% else %}
+<form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{tag}}" hx-swap="innerHTML">
+  {% csrf_token %}
+  <input type="hidden" name="tag" value="{{tag}}">
+  <input type="hidden" name="tag_type" value="people">
+  <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+    Follow
+  </button>
+</form>
+{% endif %}
+
+
+
+<ul hx-swap-oob="true" id="update-count" class="ull about">
+  <a  {% if from_ == 'profile' %} href="#followers-profile" {% else %} href="#followers" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+    <li class="mx-3">{% if followers.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers
+    </li>
+  </a>
+
+  <a  {% if from_ == 'profile' %} href="#following-profile" {% else %} href="#following" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="following">
+    <li class="mx-3">{% if profile.follow.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %}
+      Following
+    </li>
+  </a>
+</ul>
+
+
+
+
+<ul id="update-all-follower" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for follower in followers %}
+  {% if follower.user.is_active == True %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a type="button" class=" d-flex justify-content-center align-content-center "
+        {% if from_ == 'profile' %} hx-post="{% url 'page' follower.id %}?from=profile" hx-indicator="#load_home_follower" hx-target="#profile" hx-swap="innerHTML" {% else %} hx-post="{% url 'page' follower.id %}" hx-indicator="#load_home_follower" hx-target="#people" hx-swap="innerHTML" {% endif %}><img
+            src="{{follower.profile_pic.url}}" alt="{{follower.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if follower.last_seen|update_last_seen %}
+        <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div>
+          <h5 class="mb-3">
+            {{follower.user}}</h5>
+        </div>
+       
+
+          {% if follower not in profile.follow.all %}
+
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+              Follow
+            </button>
+          </form>
+          {% else %}
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+
+          {% endif %}
+
+     
+      </div>
+    </div>
+
+  </li>
+  {% endif %}
+  {% endfor %}
+
+</ul>
+
+
+
+
+<ul id="update-all-following" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for follow in profile.follow.all %}
+  {% if follow.user.is_active == True %}
+    <li class="list-group-item bg-dark text-light rounded-pill">
+      <div class="d-flex">
+        <div class=" my-auto" style="position: relative;">
+          <a type="button" class=" d-flex justify-content-center align-content-center " href="{% url 'page' follow.id %}"><img src="{{follow.profile_pic.url}}" alt="{{follow.user}}"
+              style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+          </a>{% if follow.last_seen|update_last_seen %}
+          <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% else %}
+          <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 text-center ">
+          <div>
+            <h5 class="mb-3">
+              {{follow.user}}</h5>
+          </div>
+
+          <form hx-post="{% url 'follow' follow.id %}" hx-target="#update-following-{{follow.id}}" hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="following">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+        </div>
+      </div>
+
+
+    </li>
+  {% endif %}
+  {% endfor %}
+
+</ul>
+
+
+
+
+
+{% elif tag_type == 'followers' %}
+
+<ul id="update-all-follower" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for follower in followers %}
+  {% if follower.user.is_active == True %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a type="button" class=" d-flex justify-content-center align-content-center "
+        {% if from_ == 'profile' %} hx-post="{% url 'page' follower.id %}?from=profile" hx-indicator="#load_home_follower" hx-target="#profile" hx-swap="innerHTML" {% else %} hx-post="{% url 'page' follower.id %}" hx-indicator="#load_home_follower" hx-target="#people" hx-swap="innerHTML" {% endif %}><img
+            src="{{follower.profile_pic.url}}" alt="{{follower.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if follower.last_seen|update_last_seen %}
+        <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div>
+          <h5 class="mb-3">
+            {{follower.user}}</h5>
+        </div>
+        
+
+          {% if follower not in profile.follow.all %}
+
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+              Follow
+            </button>
+          </form>
+          {% else %}
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+
+          {% endif %}
+
+      </div>
+    </div>
+
+  </li>
+  {% endif %}
+  {% endfor %}
+
+</ul>
+
+
+
+
+<ul hx-swap-oob="true" id="update-count" class="ull about">
+  <a  {% if from_ == 'profile' %} href="#followers-profile" {% else %} href="#followers" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+    <li class="mx-3">{% if followers.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers
+    </li>
+  </a>
+
+  <a  {% if from_ == 'profile' %} href="#following-profile" {% else %} href="#following" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="following">
+    <li class="mx-3">{% if profile.follow.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %}
+      Following
+    </li>
+  </a>
+</ul>
+
+
+
+
+<ul id="update-all-people" hx-swap-oob="true" class="list-group list-group-flush">
+  {% if profiles %}
+  {% for user_profile in profiles %}
+  {% if user_profile.user.is_active == True %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a type="button" class=" d-flex justify-content-center align-content-center" hx-post="{% url 'page' user_profile.id %}" hx-target="#people" hx-swap="innerHTML"><img
+            src="{{user_profile.profile_pic.url}}" alt="{{user_profile.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if user_profile.last_seen|update_last_seen %}
+        <span style="position: absolute;
+        background: #2afa6a;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 1px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+        background: #616161;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 1px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div>
+          <h5 class="mb-3">
+            {{user_profile.user}}</h5>
+        </div>
+        <div id="update-people-{{user_profile.id}}">
+          {% if user_profile in profile.follow.all %}
+          <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="tag" value="{{user_profile.id}}">
+            <input type="hidden" name="tag_type" value="people">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+          {% else %}
+          <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="tag" value="{{user_profile.id}}">
+            <input type="hidden" name="tag_type" value="people">
+            <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+              Follow
+            </button>
+          </form>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </li>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+</ul>
+
+
+
+
+<ul id="update-all-following" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for follow in profile.follow.all %}
+  {% if follow.user.is_active == True %}
+    <li class="list-group-item bg-dark text-light rounded-pill">
+      <div class="d-flex">
+        <div class=" my-auto" style="position: relative;">
+          <a type="button" class=" d-flex justify-content-center align-content-center "
+          {% if from_ == 'profile' %} hx-post="{% url 'page' follow.id %}?from=profile" hx-indicator="#load_home_following" hx-target="#profile" hx-swap="innerHTML" {% else %} hx-post="{% url 'page' follow.id %}" hx-indicator="#load_home_following" hx-target="#people" hx-swap="innerHTML" {% endif %}><img
+              src="{{follow.profile_pic.url}}" alt="{{follow.user}}"
+              style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+          </a>{% if follow.last_seen|update_last_seen %}
+          <span style="position: absolute;
+          background: #2afa6a;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+          {% else %}
+          <span style="position: absolute;
+          background: #616161;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 text-center ">
+          <div>
+            <h5 class="mb-3">
+              {{follow.user}}</h5>
+          </div>
+
+          <form hx-post="{% url 'follow' follow.id %}" hx-target="#update-all-following" hx-indicator="#load_home_following" hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="following">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+        </div>
+      </div>
+
+
+    </li>
+  {% endif %}
+  {% endfor %}
+
+</ul>
+
+
+
+{% else  %}
+
+
+<ul hx-swap-oob="true" id="update-count" class="ull about">
+  <a  {% if from_ == 'profile' %} href="#followers-profile" {% else %} href="#followers" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+    <li class="mx-3">{% if followers.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers
+    </li>
+  </a>
+
+  <a  {% if from_ == 'profile' %} href="#following-profile" {% else %} href="#following" {% endif %} role="button" data-bs-toggle="offcanvas" aria-controls="following">
+    <li class="mx-3">{% if profile.follow.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %}
+      Following
+    </li>
+  </a>
+</ul>
+
+
+
+<ul id="update-all-people" hx-swap-oob="true" class="list-group list-group-flush">
+  {% if profiles %}
+  {% for user_profile in profiles %}
+  {% if user_profile.user.is_active == True %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a type="button" class=" d-flex justify-content-center align-content-center" hx-post="{% url 'page' user_profile.id %}" hx-target="#people" hx-swap="innerHTML"><img
+            src="{{user_profile.profile_pic.url}}" alt="{{user_profile.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if user_profile.last_seen|update_last_seen %}
+        <span style="position: absolute;
+          background: #2afa6a;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+          background: #616161;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div>
+          <h5 class="mb-3">
+            {{user_profile.user}}</h5>
+        </div>
+        <div id="update-people-{{user_profile.id}}">
+          {% if user_profile in profile.follow.all %}
+          <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="tag" value="{{user_profile.id}}">
+            <input type="hidden" name="tag_type" value="people">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+          {% else %}
+          <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            <input type="hidden" name="tag" value="{{user_profile.id}}">
+            <input type="hidden" name="tag_type" value="people">
+            <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+              Follow
+            </button>
+          </form>
+          {% endif %}
+
+        </div>
+      </div>
+    </div>
+  </li>
+  {% endif %}
+  {% endfor %}
+  {% endif %}
+</ul>
+
+
+
+<ul id="update-all-people-search" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for user_profile in profile_lists %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a hx-post="{% url 'page' user_profile.id %}"  hx-target="#people"><img src="{{user_profile.profile_pic.url}}"
+            alt="{{user_profile.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if user_profile.last_seen|update_last_seen %}
+        <span style="position: absolute;
+        background: #2afa6a;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+        background: #616161;
+        width: 7px;
+        height: 7px;
+        border-radius: 50%;
+        bottom: 3px;
+        right: 11px;
+        border: 2px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div class="">
+          <div><a href="{% url 'page' user_profile.id %}">
+              <h5 class="mb-3">
+                {{user_profile.user}}</h5>
+            </a></div>
+          <div>
+            {% if user_profile in profile.follow.all %}
+            <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+              hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="tag" value="{{user_profile.id}}">
+              <input type="hidden" name="tag_type" value="people">
+              <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+                Unfollow
+              </button>
+            </form>
+            {% else %}
+            <form hx-post="{% url 'follow' user_profile.id %}" hx-target="#update-people-{{user_profile.id}}"
+              hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="tag" value="{{user_profile.id}}">
+              <input type="hidden" name="tag_type" value="people">
+              <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+                Follow
+              </button>
+            </form>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  </li>
+  {% endfor %}
+</ul>
+
+
+
+
+<ul id="update-all-follower" hx-swap-oob="true" class="list-group list-group-flush">
+  {% for follower in followers %}
+  {% if follower.user.is_active == True %}
+  <li class="list-group-item bg-dark text-light rounded-pill">
+    <div class="d-flex">
+      <div class=" my-auto" style="position: relative;">
+        <a type="button" class=" d-flex justify-content-center align-content-center "
+        {% if from_ == 'profile' %} hx-post="{% url 'page' follower.id %}?from=profile" hx-indicator="#load_home_follower" hx-target="#profile" hx-swap="innerHTML" {% else %} hx-post="{% url 'page' follower.id %}" hx-indicator="#load_home_follower" hx-target="#people" hx-swap="innerHTML" {% endif %}><img
+            src="{{follower.profile_pic.url}}" alt="{{follower.username}}"
+            style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+        </a>{% if follower.last_seen|update_last_seen %}
+        <span style="position: absolute;
+            background: #2afa6a;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% else %}
+        <span style="position: absolute;
+            background: #616161;
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            bottom: 3px;
+            right: 11px;
+            border: 1px solid #fff;"></span>
+        {% endif %}
+      </div>
+      <div class="flex-grow-1 text-center ">
+        <div>
+          <h5 class="mb-3">
+            {{follower.user}}</h5>
+        </div>
+
+
+          {% if follower not in profile.follow.all %}
+
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+              Follow
+            </button>
+          </form>
+          {% else %}
+          <form hx-post="{% url 'follow' follower.id %}" hx-target="#update-all-follower" hx-indicator="#load_home_follower"
+            hx-swap="innerHTML">
+            {% csrf_token %}
+            {% if from_ %}
+            <input type="hidden" name="from" value="profile">
+            {% endif %}
+            <input type="hidden" name="tag_type" value="followers">
+            <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+              Unfollow
+            </button>
+          </form>
+
+          {% endif %}
+
+
+      </div>
+    </div>
+
+  </li>
+  {% endif %}
+  {% endfor %}
+
+</ul>
+
+
+{% endif %}

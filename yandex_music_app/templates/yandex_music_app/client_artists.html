@@ -1,0 +1,185 @@
+{% load static %}
+{% load template_filters %}
+
+
+
+<div class="overflow-auto search-height">
+    <ul class="list-group text-white">
+
+        {% for artist in artists %}
+        <li class="list-group-item step rounded-pill">
+            <div class="d-flex justify-content-between">
+                <form hx-post="{% url 'artist' artist.artist.id 0 %}"
+                    hx-target="#display_client_artist_{{artist.artist.id}}_c_artist" hx-swap="innerHTML"
+                    hx-indicator="#load_new_client_{{artist.artist.id}}_c_artist">
+                    <button class="w-100" type="submit">
+                        <div class="d-flex track">{% if artist.artist.cover.uri %}<img
+                                style="height: 50px; width: 50px; border-radius: 50%;"
+                                src="{{artist.artist.cover.uri|replace|extend}}" class="rounded-circle "
+                                alt="">{% elif artist.artist.og_image %}<img
+                                style="height: 50px; width: 50px; border-radius: 50%;"
+                                src="{{artist.artist.og_image|replace|extend}}" class="rounded-circle "
+                                alt="">{% else %}<img style="height: 50px; width: 50px; border-radius: 50%;"
+                                src="{% static 'img/track.png' %}" class="rounded-circle " alt="">{% endif %}<div
+                                class="d-flex flex-column ms-3 my-auto" style="text-align: left;">
+                                <div class=" text-light text-state">
+                                    {{artist.artist.name}} {{artist.artist.video}}</div>
+                                <div class="text-secondary text-state" style="font-weight: 400;">
+                                    {% for genre in artist.artist.genres %}{% if not forloop.last %}
+                                    {{genre}} , {% else %} {{genre}} {% endif %}{% endfor %}</div>
+                            </div>
+                        </div>
+                    </button>
+                </form>
+                <div class="d-flex my-auto">
+                    {% if artist.content_warning == 'explicit' %}
+                    <div class="my-auto"><i class="bi bi-explicit"></i></div>
+                    {% endif %}
+                    <div class="ms-2">
+                        <button id="btn_desc_{{artist.artist.id}}_c_artist" type="submit"><i
+                                id="icon_desc_{{artist.artist.id}}_c_artist"
+                                class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <!------------ ARTIST CARD---------- -->
+
+            <div id="desc_{{artist.artist.id}}_c_artist" class="mx-auto my-auto mt-4 show-track-desc"
+                style="display: none; z-index: 99;">
+                <ul class="list-group text-white">
+                    <li class="list-group-item step rounded-pill mb-3">
+                        <div class="d-flex">
+                            {% if artist.cover.uri %}<img style="height: 100px; width: 100px; border-radius: 50%;"
+                                src="{{artist.artist.cover.uri|replace|extend}}" class="rounded-circle my-auto"
+                                alt="">{% elif artist.artist.og_image %}<img
+                                style="height: 100px; width: 100px; border-radius: 50%;"
+                                src="{{artist.artist.og_image|replace|extend}}" class="rounded-circle my-auto"
+                                alt="">{% else %}<img style="height: 100px; width: 100px; border-radius: 50%;"
+                                src="{% static 'img/track.png' %}" class="rounded-circle my-auto" alt="">{% endif %}
+                            <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                                <div class="d-flex">
+                                    <div class="text-light" style="font-size: medium;">
+                                        {{artist.artist.name}}
+                                    </div>
+                                    <div class="ms-2 my-auto">
+                                        {% if artist.artist.content_warning %}
+                                        <div>
+                                            <i class="bi bi-explicit"></i>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                                <div class="text-secondary" style="font-weight: 400;">
+
+                                    {% for genre in artist.artist.genres %}{% if not forloop.last %}
+                                    {{genre}} , {% else %} {{genre}} {% endif %}{% endfor %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </li>
+
+                    <ul class="list-group text-white">
+                        <div id="display_toggle_like_{{artist.artist.id}}_c_artist">
+                            <div class="d-flex">
+                                <div class="d-flex flex-column w-50 text-center">
+                                    <li class="list-group-item rounded-pill">
+                                        <form hx-post="{% url 'toggle_like' %}"
+                                            hx-target="#display_toggle_like_{{artist.artist.id}}_c_artist"
+                                            hx-swap="innerHTML"
+                                            hx-indicator="#load_new_toggle_like_{{artist.artist.id}}_c_artist"><input
+                                                type="hidden" name="tag" value="artist_like"><input type="hidden"
+                                                name="id" value="{{artist.artist.id}}"><input type="hidden"
+                                                name="location" value="c_artist"><button type="submit"
+                                                class="btn w-100 rounded-pill"><span
+                                                    id="display_toggle_like_{{artist.artist.id}}_c_artist"><i
+                                                        class="bi bi-heart text-warning me-2"><span
+                                                            class="ms-2">Like</span></i></span></button></form>
+                                    </li>
+                                    <div id="load_new_toggle_like_{{artist.artist.id}}_c_artist" class="htmx-indicator">
+                                        <div class="text-center">
+                                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+
+                                </div>
+                                <div class="d-flex flex-column w-50 text-center">
+                                    <li class="list-group-item rounded-pill">
+                                        <form hx-post="{% url 'toggle_like' %}"
+                                            hx-target="#display_toggle_like_{{artist.artist.id}}_c_artist"
+                                            hx-swap="innerHTML"
+                                            hx-indicator="#load_new_toggle_dislike_{{artist.artist.id}}_c_artist"><input
+                                                type="hidden" name="tag" value="artist_dislike"><input type="hidden"
+                                                name="id" value="{{artist.artist.id}}"><input type="hidden"
+                                                name="location" value="c_artist"><button type="submit"
+                                                class="btn w-100 rounded-pill"><span
+                                                    id="display_toggle_like_{{artist.artist.id}}_c_artist"><i
+                                                        class="bi bi-heartbreak text-light me-2"><span
+                                                            class="ms-2">Dislike</span></i></span></button></form>
+                                    </li>
+                                    <div id="load_new_toggle_dislike_{{artist.artist.id}}_c_artist"
+                                        class="htmx-indicator">
+                                        <div class="text-center">
+                                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                                <span class="visually-hidden">Loading...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+
+                    </ul>
+                </ul>
+            </div>
+
+            <script>
+                document.getElementById('btn_desc_{{artist.artist.id}}_c_artist').addEventListener("click",
+                function () {
+                    if (document.getElementById('desc_{{artist.artist.id}}_c_artist').style.display ===
+                        "none" && document.getElementById('icon_desc_{{artist.artist.id}}_c_artist').classList
+                        .contains("text-light")) {
+                        document.getElementById('desc_{{artist.artist.id}}_c_artist').style.display = "block";
+                        document.getElementById('icon_desc_{{artist.artist.id}}_c_artist').classList.remove(
+                            "text-light");
+                        document.getElementById('icon_desc_{{artist.artist.id}}_c_artist').classList.add(
+                            "text-warning");
+                    } else {
+                        document.getElementById('desc_{{artist.artist.id}}_c_artist').style.display = "none";
+                        document.getElementById('icon_desc_{{artist.artist.id}}_c_artist').classList.remove(
+                            "text-warning");
+                        document.getElementById('icon_desc_{{artist.artist.id}}_c_artist').classList.add(
+                            "text-light");
+                    }
+
+                });
+            </script>
+
+
+            <!------------ END ARTIST CARD---------- -->
+        </li>
+        <div id="load_new_client_{{artist.artist.id}}_c_artist" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div id="display_client_artist_{{artist.artist.id}}_c_artist">
+
+        </div>
+
+        {% endfor %}
+
+        <div style="margin-bottom: 5rem;">
+
+        </div>
+
+    </ul>
+</div>

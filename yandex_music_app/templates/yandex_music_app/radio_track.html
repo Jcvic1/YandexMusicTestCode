@@ -1,0 +1,233 @@
+{% if set_up %}
+<div id="remove_setup" style="display: block;">
+<div class="show-settings2">
+    <div class="show-settings2-display">
+
+    </div>
+<button onclick="toggleRadioSetup()" class="btn rounded-pill mx-auto w-100"><i class="bi bi-chevron-compact-up text-warning"></i></button>
+<script>
+    function toggleRadioSetup() {
+        if (document.getElementById('remove_setup').style.display === 'block'){
+            document.getElementById('remove_setup').style.display = "none";
+        }
+    }
+</script>
+<form class="d-flex justify-content-center ">{% for station in personal_stations_list %}<input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> {% endfor %}<input type="hidden" name="reset" value="any"><input type="hidden" name="reset_mood_energy" value="all"><input type="hidden" name="reset_diversity" value="default"><input type="hidden" name="reset_language" value="any"><input type="hidden" name="settings2" value="settings2"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="rounded-pill border w-75 py-2 text-light">Reset</button></form>
+<div class=" my-1 d-flex justify-content-center overflow-x-auto">
+        
+    <ul class="nav nav-pills mb-2 flex-nowrap overflow-x-auto" id="pills-tab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link yellow rounded-pill active text-nowrap" id="pills-personal-station-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-personal-station" type="button" role="tab" aria-controls="pills-personal-station"
+                aria-selected="true">PERSONAL STATIONS</button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link yellow rounded-pill text-center text-nowrap" id="pills-random-station-tab" data-bs-toggle="pill"
+                data-bs-target="#pills-random-station" type="button" role="tab" aria-controls="pills-random-station"
+                aria-selected="false" >RANDOM STATIONS</button>
+        </li>
+  
+    </ul>
+</div>
+
+<div class="tab-content" id="pills-tabContent" data-bs-theme="dark">
+    <div class="tab-pane fade show active" id="pills-personal-station" role="tabpanel" aria-labelledby="pills-personal-station-tab"
+        tabindex="0" >
+        <div class=" my-1 d-flex justify-content-center overflow-x-auto">
+            <ul class="nav nav-pills mb-2 flex-nowrap" id="pills-tab" role="tablist">
+                {% for station in personal_stations_list %}
+                {% if forloop.first %}
+                <li class="nav-item" role="presentation">
+                    <form ><input type="hidden" name="tag" value="radio"><input type="hidden" name="track_type" value="{{station.station.id.type}}"><input type="hidden" name="station_id_for_from" value="{{station.station.id_for_from}}"><input type="hidden" name="radio_first_track" value="radio_first_track"><input type="hidden" name="track_type_id" value="{{station.station.id.tag}}"><input type="hidden" name="radio_personal_stations" value="radio_personal_stations"><button hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator-{{forloop.counter}}" class="station_name nav-link yellow rounded-pill text-nowrap active" id="pills-personal-station-{{forloop.counter}}-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-personal-station-{{forloop.counter}}" type="button" role="tab" aria-controls="pills-personal-station-{{forloop.counter}}"
+                        aria-selected="true">{{station.station.name}}</button></form>
+                        <div id="radio-setup-indicator-{{forloop.counter}}" class="htmx-indicator">
+                            <div class="text-center">
+                                <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                </li>
+                
+                {% else %}
+                <li class="nav-item" role="presentation">
+                    <form><input type="hidden" name="tag" value="radio"><input type="hidden" name="track_type" value="{{station.station.id.type}}"><input type="hidden" name="station_id_for_from" value="{{station.station.id_for_from}}"><input type="hidden" name="radio_first_track" value="radio_first_track"><input type="hidden" name="track_type_id" value="{{station.station.id.tag}}"><input type="hidden" name="radio_personal_stations" value="radio_personal_stations"><button hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator-{{forloop.counter}}" class="station_name nav-link yellow rounded-pill text-nowrap" id="pills-personal-station-{{forloop.counter}}-tab" data-bs-toggle="pill"
+                        data-bs-target="#pills-personal-station-{{forloop.counter}}" type="button" role="tab" aria-controls="pills-personal-station-{{forloop.counter}}"
+                        aria-selected="true">{{station.station.name}}</button></form>
+                        <div id="radio-setup-indicator-{{forloop.counter}}" class="htmx-indicator">
+                            <div class="text-center">
+                                <div class="spinner-grow text-warning spinner-grow-vsm " role="status">
+                                    <span class="visually-hidden">Loading...</span>
+                                </div>
+                            </div>
+                        </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+                <script>
+                    var stationNames = document.querySelectorAll('.station_name');
+                    stationNames.forEach(stationName => {
+                        stationName.addEventListener('click', function() {
+                            document.getElementById('clear_setup').innerHTML = `
+                            <div id="clear_setup" class="d-flex justify-content-center  my-2">
+                                <div id="playing_station">
+                                </div>
+                                <div class="d-flex justify-content-center">
+                                    <div id="radio_setup_state_diversity"></div>
+                                    <div id="radio_setup_state_mood"></div>
+                                    <div id="radio_setup_state_language"></div>
+                                </div>
+                            </div>
+                        `;
+                        });
+                    });
+                </script>
+            </ul>
+        </div>
+        <div class="tab-content" id="pills-tabContent" data-bs-theme="dark">
+        {% for station in personal_stations_list %}
+        {% if forloop.first %}
+        <div class="tab-pane fade show active overflow-auto search-height" id="pills-personal-station-{{forloop.counter}}" role="tabpanel" aria-labelledby="pills-personal-station-{{forloop.counter}}-tab"
+        tabindex="0" >
+                    
+
+<div class="w-100 px-3 d-flex flex-column">
+    <div class="mx-auto my-1 text-light">CHARACTER</div>
+    <div class="d-flex flex-nowrap overflow-x-auto">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="favorite"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Favourite</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="discover"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Unknown</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="popular"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Popular</button></form>
+    </div> 
+</div>
+<div class="w-100 px-3 d-flex flex-column">
+    <div class="mx-auto my-1 text-light">MOOD</div>
+    <div class="d-flex flex-nowrap overflow-x-auto">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="active"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Energetic</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="fun"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Cheerful</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="calm"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Calm</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="sad"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Sad</button></form>
+    </div>
+</div>
+<div class="w-100 px-3 d-flex flex-column">
+    <div class="mx-auto my-1 text-light">LANGUAGES</div>
+    <div class="d-flex flex-nowrap overflow-x-auto">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="not-russian"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Not Russian</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="russian"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Russian</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="without-words"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Wordless</button></form>
+    </div>
+</div>
+</div>
+{% else %}
+<div class="tab-pane fade overflow-auto search-height" id="pills-personal-station-{{forloop.counter}}" role="tabpanel" aria-labelledby="pills-personal-station-{{forloop.counter}}-tab" tabindex="0" >
+        
+
+<div class="w-100 px-3 d-flex flex-column">
+    <div class="mx-auto my-1 text-light">CHARACTER</div>
+    <div class="d-flex flex-nowrap overflow-x-auto">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="favorite"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Favourite</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="discover"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Unknown</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="diversity" value="popular"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_diversity" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Popular</button></form>
+    </div> 
+</div>
+<div class="w-100 px-3 d- flex-nowrap overflow-x-auto flex-column">
+    <div class="mx-auto my-1 text-light">MOOD</div>
+    <div class="d-flex flex-nowrap overflow-x-auto">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="active"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Energetic</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="fun"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Cheerful</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="calm"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Calm</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="mood_energy" value="sad"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_mood" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Sad</button></form>
+    </div>
+</div>
+<div class="w-100 px-3 d-flex flex-column">
+    <div class="mx-auto my-1 text-light">LANGUAGES</div>
+    <div class="d-flex ">
+    <form class=" w-100 text-light ms-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="not-russian"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Not Russian</button></form>
+    <form class=" w-100 text-light mx-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="russian"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Russian</button></form>
+    <form class=" w-100 text-light me-1"><input type="hidden" name="playing_station" value="{{station.station.name}}" ><input type="hidden" name="station_id_tag" value="{{station.station.id.tag}}"><input type="hidden" name="station_id_type" value="{{station.station.id.type}}"> <input type="hidden" name="settings2" value="settings2"> <input type="hidden" name="language" value="without-words"><button hx-post="{% url 'yandex_radio' %}" hx-target="#radio_setup_state_language" hx-swap="innerHTML" hx-indicator="#radio-setup-indicator" class="setting_activate rounded-pill text-nowrap border w-100 text-light mx-1" >Wordless</button></form>
+    </div>
+</div>
+</div>
+{% endif %}      
+{% endfor %}
+<script>
+    var settingBtns = document.querySelectorAll('.setting_activate');
+    settingBtns.forEach(settingBtn => {
+        settingBtn.addEventListener('click', function() {
+            settingBtn.classList.add('border-warning');
+        });
+    });
+</script>
+</div>
+
+
+
+    </div>
+
+    <div class="tab-pane fade overflow-auto search-height" id="pills-random-station" role="tabpanel" aria-labelledby="pills-random-station-tab"
+        tabindex="0" >
+        
+        <div class="d-flex justify-content-center" ><form id="radio_form" hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#radio-indicator" ><input type="hidden" name="tag" value="radio"><input type="hidden" name="radio_first_track" value="radio_first_track"><input type="hidden" name="radio_random_stations" value="radio_random_stations"><button hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList" class="btn text-light rounded-pill text-nowrap" style="background-color: #b8860b; color: whitesmoke">Random Stations</button></form></div>
+    </div>
+   
+
+</div>
+<div hx-swap-oob="true" id="radio_setup_state" class="d-flex justify-content-center">
+
+</div>
+
+
+
+</div>
+</div>
+{% elif reset %}
+<div hx-swap-oob="true" id="clear_setup" class="d-flex justify-content-center  mb-1">
+<div id="playing_station" >
+                         
+</div>
+<div class="d-flex justify-content-center">
+
+    <div id="radio_setup_state_diversity">
+
+    </div>
+    <div id="radio_setup_state_mood">
+
+    </div>
+    <div id="radio_setup_state_language">
+
+    </div>
+</div>
+</div>
+{% elif settings2 %}
+
+{% if diversity != None and diversity != 'reset' %}
+ <div class="mx-1 border rounded-pill p-1 text-nowrap">{{diversity}}</div>
+ {% endif %}
+ {% if mood_energy != None and mood_energy != 'reset' %}
+ <div class="mx-1 border rounded-pill p-1 text-nowrap">{{mood_energy}}</div>
+ {% endif %}
+ {% if language != None and language != 'reset' %}
+ <div class="mx-1 border rounded-pill p-1 text-nowrap">{{language}}</div>
+ {% endif %}
+
+
+<div hx-swap-oob="true" id="playing_station" class="d-flex justify-content-center">
+    {% if playing_station %}
+    <div class="fs-6 py-1 text-nowrap">{{playing_station}}</div>
+    {% endif %}
+</div>
+
+<form class="d-none" hx-post="{% url 'track' 0 %}" hx-target="#player_console" hx-swap="innerHTML" hx-indicator="#trackList" hx-trigger="load"><input type="hidden" name="station" value="{{station}}"><input type="hidden" name="tag" value="radio"><input type="hidden" name="radio_set" value="radio_set"><input type="hidden" name="station_settings2" value="{{station_settings2}}"><input type="hidden" name="station_settings2_initialize" value="station_settings2_initialize"><button type="submit"></button></form>
+
+{% endif %}
+
+
+
+
+
+
+
+
+
+
+

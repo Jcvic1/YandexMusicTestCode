@@ -1,0 +1,72 @@
+{% load static %}
+{% load template_filters %}
+{% if videos %}
+<div id="video_{{track.id}}" class="overflow-auto search-height" style="transition: opacity 0.5s ease-out;">
+    <div class="d-flex justify-content-center"><button id="btn_{{track.id}}" class="btn w-25 rounded-pill"><i
+                class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <ul style="border-radius: 30px;padding-left: 0;" class="border border-warning ">
+        <h6 class="my-3 text-center">Video(s)</h6>
+        {% for video in videos %}
+
+        <li class="list-group-item step rounded-pill">
+            <div class="d-flex justify-content-between">
+                <a href="{{video.embed_url}}" target="_blank" rel="noreferrer">
+                    <button type="submit">
+                        <div class="d-flex track-inner">
+                            {% if video.cover %}
+                            <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{video.cover|replace}}"
+                                class="rounded-circle my-auto" alt="">{% else %}
+                            <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{video.og_image|replace}}"
+                                class="rounded-circle my-auto" alt="">{% endif %}
+                            <div class="my-auto ms-3 " style="text-align: left;">
+                                <div class="text-light text-state">
+                                    {{video.title}}
+                                </div>
+                                <div class="text-secondary text-state" style="font-weight: 400;">
+                                    {% for artist in video.artists %}{% if not forloop.last %}
+                                    {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+                                </div>
+                            </div>
+
+                        </div>
+                    </button>
+                </a>
+                <div class="d-flex my-auto">
+                    {% if video.explicit %}
+                    <div class="my-auto">
+                        <i class="bi bi-explicit"></i>
+                    </div>
+                    {% endif %}
+                    <div class="ms-2">
+                        <button type="submit"><i class="bi bi-three-dots-vertical text-light"
+                                style="font-size: 1.7rem;"></i></button>
+                    </div>
+                </div>
+            </div>
+        </li>
+        <div id="load_video_{{track.id}}" class="htmx-indicator">
+            <div class="text-center">
+                <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                    <span class="visually-hidden">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+    </ul>
+</div>
+
+
+
+
+<script>
+    document.getElementById('btn_{{track.id}}').addEventListener('click', () => {
+        document.getElementById('video_{{track.id}}').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('video_{{track.id}}').remove();
+        }, 500);
+    });
+</script>
+
+
+{% endif %}

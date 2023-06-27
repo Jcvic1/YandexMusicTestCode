@@ -1,0 +1,192 @@
+
+{% extends 'yandex_music_app/base.html' %}
+{% load static %}
+{% block title %}Home{% endblock %}
+{% block content %}
+<div id="home">
+
+<div class=" mb-1 mt-3 ">
+  <ul class="nav nav-pills d-flex justify-content-around w-100 mb-3" id="pills-tab" role="tablist">
+    <li class="nav-item py-auto" role="presentation">
+      <a hx-post="{% url 'profile' %}" hx-target="#profile" hx-indicator="#load_home" class="nav-link yellow rounded-pill w-100"
+        id="pills-profile-tab" data-bs-toggle="pill" data-bs-target="#pills-profile" type="button" role="tab"
+        aria-controls="pills-profile" aria-selected="false"><i class="bi bi-person-circle">Profile</i></a>
+    </li>
+    <li class="nav-item " role="presentation">
+      <button class="nav-link yellow rounded-pill active w-100" id="pills-home-tab" data-bs-toggle="pill"
+        data-bs-target="#pills-home" type="button" role="tab" aria-controls="pills-home" aria-selected="true"><i
+          class="bi bi-music-note">Music</i></button>
+    </li>
+    <li class="nav-item py-auto" role="presentation">
+      <a hx-post="{% url 'people' %}" hx-target="#people" hx-indicator="#load_home" class="nav-link yellow rounded-pill w-100"
+        id="pills-people-tab" data-bs-toggle="pill" data-bs-target="#pills-people" type="button" role="tab"
+        aria-controls="pills-people" aria-selected="false"><i class="bi bi-people-fill">People</i></a>
+    </li>
+
+  </ul>
+</div>
+
+<div id="load_home" class="htmx-indicator">
+  <div class="text-center">
+    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+      <span class="visually-hidden">Loading...</span>
+    </div>
+  </div>
+</div>
+
+<div class="tab-content" id="pills-tabContent">
+
+
+  <!-- PROFILE -->
+
+  <div class="tab-pane fade" id="pills-profile" role="tabpanel" aria-labelledby="pills-profile-tab" tabindex="0">
+    <div id="profile" class="pb-5 mb-3">
+
+    </div>
+  </div>
+
+  <!-- YANDEX MUSIC -->
+
+  <div class="tab-pane fade show active" id="pills-home" role="tabpanel" aria-labelledby="pills-home-tab" tabindex="0">
+
+    <div class="container" id="music" class="pb-5 mb-3">
+      {% if existing_token %}
+
+      <div id="yandex_full" style="font-size: smaller;">
+        {% include 'yandex_music_app/yandex_music_index.html' %}
+      </div>
+
+      {% else %}
+
+      <div id="y_form_spinner" class="htmx-indicator">
+        <div class="text-center">
+          <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      </div>
+
+      <form hx-post="{% url 'yandex_music_login' %}" hx-indicator="#y_form_spinner" hx-target="#music"
+        hx-swap="innerHTML">
+        {% csrf_token %}
+
+
+        <div class="mb-3 col-sm-12 col-md-8 mx-auto">
+          <label for="token" class="form-label d-flex justify-content-center">Yandex Token</label>
+          <input type="text" class="form-control rounded-pill " name="token">
+
+
+        </div>
+
+        <div class="mb-3  ">
+          <label for="language" class="form-label d-flex justify-content-center">Select Yandex Music Language </label>
+          <div class="col-md-2 col-lg-1 mx-auto">
+            <select name="language" class="form-select rounded-pill" aria-label="Default select " required>
+              <option class="text-center" value="en">en</option>
+              <option class="text-center" value="uz">uz</option>
+              <option class="text-center" value="uk">uk</option>
+              <option class="text-center" value="us">us</option>
+              <option class="text-center" value="ru">ru</option>
+              <option class="text-center" value="kk">kk</option>
+              <option class="text-center" value="hy">hy</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="row mb-4 text-center">
+          <div class="col">
+            <a href="https://passport.yandex.ru/auth/restore/">Forgot password?</a>
+          </div>
+
+        </div>
+
+        <div class="mb-3 text-center">
+          <label for="checked" class="text-nowrap">I Have Agreed To <span  data-bs-toggle="modal"
+            data-bs-target="#termsModal">
+            <span class="text-warning">Terms</span>
+        </span>
+        
+  </label>
+          <input type="checkbox" class="mt-3" name="checked">
+        </div>
+
+        <div class="d-flex justify-content-center  mb-3"><button id="y_form_button" type="submit"
+            class="btn btn-secondary px-5 rounded-pill">Sign In</button></div>
+
+        <div class="text-center">
+          <p>No ID? <a href="https://passport.yandex.ru/registration">Register</a></p>
+        </div>
+      </form>
+
+
+
+      {% endif %}
+
+    </div>
+
+    <div class="modal fade" id="termsModal" tabindex="-1" aria-labelledby="termsModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog modal-dialog-centered">
+                <div class="modal-content">
+                    <div class="modal-body text-light">
+                        <p class="text-center">By Accepting, You Agree That Your Token Is Encryted And Stored In Our Database To Be Used In Generating Music From Your Account.</p>
+                        <p class="text-center">The Token Doesn't Represent Your Account But An Authourization That Connects Your Yandex Account To Yandex Music.</p>
+                        <p class="text-center">You Can Delete Your Token From The Top Left Navigation Bar After Signing In And It Will Be Deleted From Our Database.</p>
+                    </div>
+                    <div class="modal-footer d-flex justify-content-center">
+                        <button type="button" class="btn btn-secondary rounded-pill px-5"
+                            data-bs-dismiss="modal">OK</button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+  </div>
+
+
+  <!-- PEOPLE -->
+
+
+  <div class="tab-pane fade" id="pills-people" role="tabpanel" aria-labelledby="pills-people-tab" tabindex="0">
+    <div id="people" class="pb-5 mb-5">
+
+    </div>
+  </div>
+</div>
+
+<div class="fixed-bottom" style="z-index: 9999; background-color:#000000; font-size: smaller;">
+<div  class="bg-dark border rounded-pill">
+  <div id="player_console">
+    <div id="player" class="htmx-indicator my-auto">
+      <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+          <span class="visually-hidden">Loading...</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</div>
+</div>
+
+
+
+
+
+
+</div>
+
+<script>
+  window.addEventListener("popstate", function(event) {
+    location.reload(true);
+    console.log('reloded')
+  });
+</script>
+
+
+
+
+{% endblock %}
+

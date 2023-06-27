@@ -1,0 +1,17 @@
+{% load static %}
+{% load template_filters %}
+
+{% for video in videos %}
+{% if forloop.last %}
+{% if page %}
+<div hx-post="{% url 'update_videos' searched  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_new_video">
+</div>
+{% endif %}
+{% else %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex"><img src="{{video.cover_uri|replace|extend}}" class="rounded-circle" alt=""><span
+            class="ms-5 my-auto">{{video.title}}</span></div>
+</li>
+{% endif %}
+{% endfor %}

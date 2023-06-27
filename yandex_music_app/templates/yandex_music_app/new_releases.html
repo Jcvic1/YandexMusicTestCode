@@ -1,0 +1,77 @@
+{% load static %}
+{% load template_filters %}
+
+
+<div id="{{new_releases_full.id}}">
+    <div class="d-flex justify-content-center"><button id="btn_{{new_releases_full.id}}"
+            class="btn w-25 rounded-pill"><i class="bi bi-chevron-compact-up text-warning"></i></button></div>
+    <h5 class="text-center my-3">New tracks, albums, and compilations</h5>
+
+    <ul class="list-group text-white">
+
+        <div class="container">
+            <div class="row">
+                {% for album in new_releases_full_album %}
+                <div class="col-6 col-sm-6 col-md-4 col-lg-3">
+                    <form hx-post="{% url 'album' album.id %}" hx-target="#new_new_release_full_album_{{album.id}}"
+                        hx-swap="innerHTML" hx-indicator="#load_new_new_release_full_album_{{album.id}}">
+
+                        <button type="submit">
+                            {% if album.cover.uri %}<img class="rounded w-100" src="{{album.cover.uri|replace|extend}}"
+                                alt="">{% else %}<img class="rounded w-100" src="{{album.og_image|replace|extend}}"
+                                alt="">{% endif %}
+                        </button>
+
+                    </form>
+
+                    <div class=" d-flex justify-content-between flex-nowrap my-2 w-100">
+
+                        <div class="ms-1" style="text-align: left;">
+                            <div class="text-light ">
+                                {{album.title}}
+                            </div>
+                            <div class="text-secondary" style="font-weight: 400;">
+                                {% for artist in album.artists%}{% if not forloop.last %}
+                                {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+                                <div>{% if album.type == None %} {% else %} {{album.type}} {% endif %}</div>
+                            </div>
+                        </div>
+                        <div class="my-auto">
+                            {% if album.content_warning == 'explicit' %}
+                            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+                            {% endif %}
+                        </div>
+                    </div>
+
+                    <div id="load_new_new_release_full_album_{{album.id}}" class="htmx-indicator w-100 mb-2">
+                        <div class="text-center">
+                            <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                <span class="visually-hidden">Loading...</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="new_new_release_full_album_{{album.id}}" class="client-show-track-list">
+
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+
+
+        <div style="margin-bottom: 5rem;">
+
+        </div>
+    </ul>
+
+</div>
+
+<script>
+    document.getElementById('btn_{{new_releases_full.id}}').addEventListener('click', () => {
+        document.getElementById('{{new_releases_full.id}}').classList.add('hide-drop');
+        setTimeout(() => {
+            document.getElementById('{{new_releases_full.id}}').remove();
+        }, 500);
+    });
+</script>

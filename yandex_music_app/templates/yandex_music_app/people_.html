@@ -1,0 +1,95 @@
+{% load template_filters %}
+
+{% include 'yandex_music_app/msg.html' %}
+
+<div class="container">
+  <div class="d-flex justify-content-center  my-3">
+    <a class=" border rounded-pill px-5 py-1" aria-controls="search_people" onclick="peopleSearch()" id="people-search">
+      <i class="bi bi-search">&nbsp;&nbsp;Search</i>
+    </a>
+  </div>
+
+
+  <div class="search-profile my-2" style="display: none;">
+    <div class="input-group bg-light border rounded-pill">
+      <input hx-post="{% url 'search_profile' %}" hx-target="#profile-people-suggestions"
+        hx-trigger="keyup changed delay:500ms" class="form-control search border-0  rounded-pill" type="search"
+        name="searched" placeholder="search people">
+      <span class="input-group-append">
+        <button class="btn rounded-pill " type="submit">
+          <span class="text-dark"><i class="bi bi-search"></i></span>
+        </button>
+      </span>
+    </div>
+
+    <div id="profile-people-suggestions"></div>
+  </div>
+  <ul id="update-all-people" class="list-group list-group-flush">
+    {% if profiles %}
+    {% for user_profile in profiles %}
+    {% if user_profile.user.is_active == True %}
+    <li class="list-group-item bg-dark text-light rounded-pill">
+      <div class="d-flex">
+        <div class=" my-auto" style="position: relative;">
+          <a type="button" class=" d-flex justify-content-center align-content-center"
+            hx-post="{% url 'page' user_profile.id %}" hx-target="#people" hx-indicator="#load_home"><img
+              src="{{user_profile.profile_pic.url}}" alt="{{user_profile.user}}"
+              style="border: 2px solid black;height: 60px;width: 60px;border-radius: 50%;" />
+          </a>{% if user_profile.last_seen|update_last_seen %}
+          <span style="position: absolute;
+          background: #2afa6a;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+          {% else %}
+          <span style="position: absolute;
+          background: #616161;
+          width: 7px;
+          height: 7px;
+          border-radius: 50%;
+          bottom: 3px;
+          right: 11px;
+          border: 1px solid #fff;"></span>
+          {% endif %}
+        </div>
+        <div class="flex-grow-1 text-center ">
+          <div>
+            <h5 class="mb-3">
+              {{user_profile.user}}</h5>
+          </div>
+          <div id="update-people-{{user_profile.id}}">
+            {% if user_profile in profile.follow.all %}
+            <form hx-post="{% url 'follow' user_profile.id %}" hx-indicator="#load_home"
+              hx-target="#update-people-{{user_profile.id}}" hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="tag" value="{{user_profile.id}}">
+              <input type="hidden" name="tag_type" value="people">
+              <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+                Unfollow
+              </button>
+            </form>
+            {% else %}
+            <form hx-post="{% url 'follow' user_profile.id %}" hx-indicator="#load_home"
+              hx-target="#update-people-{{user_profile.id}}" hx-swap="innerHTML">
+              {% csrf_token %}
+              <input type="hidden" name="tag" value="{{user_profile.id}}">
+              <input type="hidden" name="tag_type" value="people">
+              <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+                Follow
+              </button>
+            </form>
+            {% endif %}
+
+          </div>
+        </div>
+      </div>
+    </li>
+    {% endif %}
+    {% endfor %}
+    {% endif %}
+  </ul>
+
+</div>

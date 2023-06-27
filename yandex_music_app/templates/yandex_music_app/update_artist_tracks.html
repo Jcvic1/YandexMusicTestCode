@@ -1,0 +1,260 @@
+{% load static %}
+{% load template_filters %}
+
+{% for track in tracks %}
+{% if forloop.last %}
+{% if page %}
+<div hx-post="{% url 'update_artist_tracks' id  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_artist_new_track">
+</div>
+
+{% endif %}
+{% else %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'track' track.id %}" hx-target="#player_console" hx-swap="innerHTML"
+            hx-indicator="#load_track_{{track.id}}">
+            <input type="hidden" name="tag" value="track"><input type="hidden" name="sub_tag"
+                value="artist-tracks"><input type="hidden" name="page" value="{{page}}"><input type="hidden"
+                name="tagId" value="{{id}}">
+            <button type="submit">
+                <div class="d-flex track">
+                    {% if track.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{track.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{track.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="my-auto ms-3 " style="text-align: left;">
+                        <div class="text-light text-state">
+                            {{track.title}}
+                        </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;">
+                            {% for artist in track.artists %}{% if not forloop.last %}
+                            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </button>
+        </form>
+        <div class="d-flex my-auto">
+            {% if track.content_warning %}
+            <div class="my-auto">
+                <i class="bi bi-explicit"></i>
+            </div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{track.id}}_artist_track" type="submit"><i
+                        id="icon_desc_{{track.id}}_artist_track" class="bi bi-three-dots-vertical text-light"
+                        style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ TRACK CARD---------- -->
+
+    <div id="desc_{{track.id}}_artist_track" class="mx-auto my-auto mt-4 show-track-desc"
+        style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if track.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{track.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{track.og_image|replace|extend}}" class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{track.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if track.explicit %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% for artist in track.artists %}{% if not forloop.last %}
+                            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ●
+                            {{track.duration_ms|to_mins_secs}}
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{track.id}}_artist_track">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{track.id}}_artist_track" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{track.id}}_artist_track"><input type="hidden"
+                                        name="tag" value="artist_like"><input type="hidden" name="id"
+                                        value="{{track.id}}"><input type="hidden" name="location"
+                                        value="artist_track"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{track.id}}_artist_track">{% if track.id in fav_tracks %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{track.id}}_artist_track" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{track.id}}_artist_track" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{track.id}}_artist_track"><input
+                                        type="hidden" name="tag" value="artist_dislike"><input type="hidden" name="id"
+                                        value="{{track.id}}"><input type="hidden" name="location"
+                                        value="artist_track"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{track.id}}_artist_track"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{track.id}}_artist_track" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_album' track.id %}"
+                        hx-target="#display_to_albums_{{track.id}}_artist_track" hx-swap="innerHTML"
+                        hx-indicator="#load_new_to_album_{{track.id}}_artist_track"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-vinyl text-light me-2"><span
+                                    class="ms-2">Album</span></i></button></form>
+                </li>
+                <div id="load_new_to_album_{{track.id}}_artist_track" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_albums_{{track.id}}_artist_track">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_artist' track.id %}"
+                        hx-target="#display_to_artists_{{track.id}}_artist_track" hx-swap="innerHTML"
+                        hx-indicator="#load_new_to_artists_{{track.id}}_artist_track"><input type="hidden" name="tag"
+                            value="track"><button type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-mic text-light me-2"><span class="ms-2">Artist</span></i></button></form>
+                </li>
+                <div id="load_new_to_artists_{{track.id}}_artist_track" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_artists_{{track.id}}_artist_track">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'lyrics' track.id %}" hx-target="#display_lyrics_{{track.id}}_artist_track"
+                        hx-swap="innerHTML" hx-indicator="#load_new_lyrics_{{track.id}}_artist_track"><input
+                            type="hidden" name="tag" value="track"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-body-text text-light me-2"><span
+                                    class="ms-2">Lyrics</span></i></button></form>
+                </li>
+                <div id="load_new_lyrics_{{track.id}}_artist_track" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_lyrics_{{track.id}}_artist_track">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'add_tracks' track.id %}"
+                        hx-target="#display_add_tracks_{{track.id}}_artist_track" hx-swap="innerHTML"
+                        hx-indicator="#load_new_add_tracks_{{track.id}}_artist_track"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-plus-lg text-light me-2"><span
+                                    class="ms-2">Add</span></i></button></form>
+                </li>
+                <div id="load_new_add_tracks_{{track.id}}_artist_track" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_add_tracks_{{track.id}}_artist_track">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'video' track.id %}" hx-target="#display_video_{{track.id}}_artist_track"
+                        hx-swap="innerHTML" hx-indicator="#load_new_video_{{track.id}}_artist_track"><button
+                            type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-film text-light me-2"><span class="ms-2">Video</span></i></button></form>
+                </li>
+                <div id="load_new_video_{{track.id}}_artist_track" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_video_{{track.id}}_artist_track">
+
+                </div>
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{track.id}}_artist_track').addEventListener("click", function () {
+            if (document.getElementById('desc_{{track.id}}_artist_track').style.display === "none" && document
+                .getElementById('icon_desc_{{track.id}}_artist_track').classList.contains("text-light")) {
+                document.getElementById('desc_{{track.id}}_artist_track').style.display = "block";
+                document.getElementById('icon_desc_{{track.id}}_artist_track').classList.remove("text-light");
+                document.getElementById('icon_desc_{{track.id}}_artist_track').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{track.id}}_artist_track').style.display = "none";
+                document.getElementById('icon_desc_{{track.id}}_artist_track').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{track.id}}_artist_track').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END TRACK CARD---------- -->
+
+</li>
+<div id="load_track_{{track.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+
+{% endif %}
+{% endfor %}

@@ -1,0 +1,54 @@
+
+
+<div class="d-flex flex-column">
+  {% if profile.user != request.user %}
+  <div>
+
+    {% if profile not in user_profile.follow.all %}
+    <form hx-post="{% url 'about_page_follow' profile.id %}" hx-target="#home" hx-swap="innerHTML">
+      {% csrf_token %}
+      <button type="submit" class=" btn btn-outline-success btn-xs rounded-pill">
+        Follow
+      </button>
+    </form>
+    {% else %}
+    <form hx-post="{% url 'about_page_follow' profile.id %}" hx-target="#home" hx-swap="innerHTML">
+      {% csrf_token %}
+      <button type="submit" class=" btn btn-outline-danger btn-xs rounded-pill">
+        Unfollow
+      </button>
+    </form>
+    {% endif %}
+  </div>
+  {% endif %}
+</div>
+
+{% if profile.user != request.user %}
+<ul class="ull about">
+  <a href="#foreign_followers" role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+    <li class="mx-3">{% if followers.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers</li>
+  </a>
+  <a href="#foreign_following" role="button" data-bs-toggle="offcanvas" aria-controls="following">
+    <li class="mx-3">{% if profile.follow.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %} Following
+    </li>
+  </a>
+</ul>
+{% else %}
+<ul class="ull about">
+  <a href="#followers" role="button" data-bs-toggle="offcanvas" aria-controls="followers">
+    <li class="mx-3">{% if followers.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{followers.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{followers.count}}</span>{% endif %} Followers</li>
+  </a>
+  <a href="#following" role="button" data-bs-toggle="offcanvas" aria-controls="following">
+    <li class="mx-3">{% if profile.follow.count == 0 %}<span
+        class="badge bg-danger rounded-pill text-light">{{profile.follow.count}}</span>{% else %}<span
+        class="badge bg-success rounded-pill text-light">{{profile.follow.count}}</span>{% endif %} Following
+    </li>
+  </a>
+</ul>
+{% endif %}

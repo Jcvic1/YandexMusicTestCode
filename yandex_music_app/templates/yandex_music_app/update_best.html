@@ -1,0 +1,1074 @@
+{% load static %}
+{% load template_filters %}
+
+{% if forloop.first %}
+{% if page %}
+<div hx-post="{% url 'update_best' searched  page|add:1 %}" hx-trigger="intersect once" hx-swap="afterend"
+    hx-target="this" hx-indicator="#load_new_best">
+</div>
+{% endif %}
+{% else %}
+{% if type == 'track' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'track' best.id %}" hx-target="#player_console" hx-swap="innerHTML"
+            hx-indicator="#load_track_best_{{best.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track">
+                    {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if best.explicit %}
+            <div class="my-auto">
+                <i class="bi bi-explicit"></i>
+            </div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.id}}_best" type="submit"><i id="icon_desc_{{best.id}}_best"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+
+    <!------------ TRACK CARD---------- -->
+
+    <div id="best_desc_{{best.id}}" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.explicit %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% for artist in best.artists %}{% if not forloop.last %}
+                            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ●
+                            {{best.duration_ms|to_mins_secs}}
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.id}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="track_like"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best">{% if best.id|striptags in fav_tracks %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="track_dislike"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_album' best.id %}" hx-target="#display_to_albums_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_to_album_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-vinyl text-light me-2"><span
+                                    class="ms-2">Album</span></i></button></form>
+                </li>
+                <div id="load_new_to_album_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_albums_{{best.id}}_best">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_artist' best.id %}" hx-target="#display_to_artists_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_to_artists_{{best.id}}_best"><input type="hidden"
+                            name="tag" value="track"><button type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-mic text-light me-2"><span class="ms-2">Artist</span></i></button></form>
+                </li>
+                <div id="load_new_to_artists_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_artists_{{best.id}}_best">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'lyrics' best.id %}" hx-target="#display_lyrics_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_lyrics_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-body-text text-light me-2"><span
+                                    class="ms-2">Lyrics</span></i></button></form>
+                </li>
+                <div id="load_new_lyrics_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_lyrics_{{best.id}}_best">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'add_tracks' best.id %}" hx-target="#display_add_tracks_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_add_tracks_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-plus-lg text-light me-2"><span
+                                    class="ms-2">Add</span></i></button></form>
+                </li>
+                <div id="load_new_add_tracks_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_add_tracks_{{best.id}}_best">
+
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'video' best.id %}" hx-target="#display_video_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_video_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-film text-light me-2"><span
+                                    class="ms-2">Video</span></i></button></form>
+                </li>
+                <div id="load_new_video_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_video_{{best.id}}_best">
+
+                </div>
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END TRACK CARD---------- -->
+
+
+
+
+</li>
+<div id="load_track_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+
+{% elif type == 'artist' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'artist' best.id 0 %}" hx-swap="innerHTML" hx-target="#display_best_artist_{{best.id}}"
+            hx-indicator="#load_artist_best_{{best.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track">
+                    {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if artist.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.id}}_best" type="submit"><i id="icon_desc_{{best.id}}_best"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ ARTIST CARD---------- -->
+
+    <div id="desc_{{best.id}}_best" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.name}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+
+                            {% for genre in best.genres %}{% if not forloop.last %}
+                            {{genre}} , {% else %} {{genre}} {% endif %}{% endfor %}
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.id}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="artist_like"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best">{% if best.id|striptags in fav_artists %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="artist_dislike"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END ARTIST CARD---------- -->
+</li>
+<div id="load_artist_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_best_artist_{{best.id}}">
+
+</div>
+{% elif type == 'album' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'album' best.id %}" hx-swap="innerHTML" hx-target="#display_best_album_{{best.id}}"
+            hx-indicator="#load_album_best_{{best.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track"> {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if best.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.id}}_best" type="submit"><i id="icon_desc_{{best.id}}_best"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ ALBUM CARD---------- -->
+
+    <div id="desc_{{best.id}}_best" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% for artist in best.artists %}{% if not forloop.last %}
+                            {{artist.name}} , {% else %} {{artist.name}} {% endif %} {% endfor %} ● {{best.year}}
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.id}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="album_like"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best">{% if best.id in fav_albums %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="album_dislike"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_artist' best.id %}" hx-target="#display_to_artists_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_to_artists_{{best.id}}_best"><input type="hidden"
+                            name="tag" value="album"><button type="submit" class="btn w-100 text-start rounded-pill"><i
+                                class="bi bi-mic text-light me-2"><span class="ms-2">Artist</span></i></button></form>
+                </li>
+                <div id="load_new_to_artists_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_artists_{{best.id}}_best">
+
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END ALBUM CARD---------- -->
+</li>
+<div id="load_album_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_best_album_{{best.id}}">
+
+</div>
+{% elif type == 'playlist' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'playlist' best.uid best.kind %}" hx-swap="innerHTML"
+            hx-target="#display_best_playlist_{{best.kind}}" hx-indicator="#load_playlist_best_{{best.kind}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track"> {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if best.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.kind}}_best" type="submit"><i class="bi bi-three-dots-vertical text-light"
+                        style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ PLAYLIST CARD---------- -->
+
+    <div id="desc_{{best.kind}}_best" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+
+                            {{best.track_count}} tracks
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.kind}}_{{forloop.counter}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.kind}}_{{forloop.counter}}_best"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.kind}}_{{forloop.counter}}_best"><input
+                                        type="hidden" name="tag" value="playlist_like"><input type="hidden" name="id"
+                                        value="{{best.uid}}:{{best.kind}}"><input type="hidden" name="location"
+                                        value="best"><button type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.kind}}_{{forloop.counter}}_best">
+                                            {% if best.kind|join_var:best.uid in fav_bests %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.kind}}_{{forloop.counter}}_best"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.kind}}_{{forloop.counter}}_best"
+                                    hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.kind}}_{{forloop.counter}}_best">
+                                    <input type="hidden" name="tag" value="playlist_dislike"><input type="hidden"
+                                        name="id" value="{{best.uid}}:{{best.kind}}"><input type="hidden"
+                                        name="location" value="best"><button type="submit"
+                                        class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.kind}}_{{forloop.counter}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.kind}}_{{forloop.counter}}_best"
+                                class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END PLAYLIST CARD---------- -->
+</li>
+
+<div id="load_playlist_best_{{best.kind}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_best_playlist_{{best.kind}}">
+
+</div>
+{% elif type == 'podcast' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'podcast' best.id %}" hx-swap="innerHTML" hx-target="#display_best_podcast_{{best.id}}"
+            hx-indicator="#load_podcast_best_{{best.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track"> {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if best.content_warning == 'explicit' %}
+            <div class="my-auto"><i class="bi bi-explicit"></i></div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.id}}_best" type="submit"><i id="icon_desc_{{best.id}}_best"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+
+    <!------------ PODCAST CARD---------- -->
+
+    <div id="desc_{{best.id}}_best" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">
+                            {% if best.likes_count >= 2 %}{{best.likes_count}} likes {% else %}{% endif %}
+                        </div>
+                    </div>
+
+                </div>
+            </li>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.id}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="album_like"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best">{% if best.id in fav_albums %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="album_dislike"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END PODCAST CARD---------- -->
+</li>
+
+<div id="load_podcast_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_best_podcast_{{best.id}}">
+
+</div>
+{% elif type == 'podcast_episode' %}
+<li class="list-group-item step rounded-pill">
+    <div class="d-flex justify-content-between">
+        <form hx-post="{% url 'episode' best.id %}" hx-swap="innerHTML" hx-target="#player_console"
+            hx-indicator="#load_episode_best_{{best.id}}">
+            <button class="w-100" type="submit">
+                <div class="d-flex track"> {% if best.cover_uri %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="ms-3 my-auto" style="text-align: left;">
+                        <div class="text-light text-state"> {{type|title}} </div>
+                        <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                    </div>
+                </div>
+            </button></form>
+        <div class="d-flex my-auto">
+            {% if best.content_warning == 'explicit' %}
+            <div class="my-auto">
+                <i class="bi bi-explicit"></i>
+            </div>
+            {% endif %}
+            <div class="ms-2">
+                <button id="btn_desc_{{best.id}}_best" type="submit"><i id="icon_desc_{{best.id}}_best"
+                        class="bi bi-three-dots-vertical text-light" style="font-size: 1.7rem;"></i></button>
+            </div>
+        </div>
+    </div>
+    <!------------ EPISODE CARD---------- -->
+
+
+
+    <div id="desc_{{best.id}}_best" class="mx-auto my-auto mt-4 show-track-desc" style="display: none; z-index: 99;">
+        <ul class="list-group text-white">
+            <li class="list-group-item step rounded-pill mb-3">
+                <div class="d-flex">
+                    {% if best.cover_uri %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;"
+                        src="{{best.cover_uri|replace|extend}}" class="rounded-circle my-auto" alt="">{% else %}
+                    <img style="height: 100px; width: 100px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                        class="rounded-circle my-auto" alt="">{% endif %}
+                    <div class="d-flex flex-column my-auto ms-3 " style="text-align: left;">
+                        <div class="d-flex">
+                            <div class="text-light" style="font-size: medium;">
+                                {{best.title}}
+                            </div>
+                            <div class="ms-2 my-auto">
+                                {% if best.content_warning %}
+                                <div>
+                                    <i class="bi bi-explicit"></i>
+                                </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="text-secondary" style="font-weight: 400;">{{best.duration_ms|to_mins_secs}}
+                        </div>
+
+                    </div>
+
+                </div>
+            </li>
+
+            <div class="text-secondary p-2"
+                style="font-weight: 400; background-color: #d3d3d3; border-radius: 10px; margin: 10px;">
+                {{best.short_description}}
+            </div>
+
+            <ul class="list-group text-white">
+                <div id="display_toggle_like_{{best.id}}_best">
+                    <div class="d-flex">
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_like_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="track_like"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best">{% if best.id|striptags in fav_tracks %}<i
+                                                class="bi bi-heart text-warning me-2">{% else %}<i
+                                                    class="bi bi-heart text-light me-2">{% endif %}<span
+                                                        class="ms-2">Like</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_like_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+
+                        </div>
+                        <div class="d-flex flex-column w-50 text-center">
+                            <li class="list-group-item rounded-pill">
+                                <form hx-post="{% url 'toggle_like' %}"
+                                    hx-target="#display_toggle_like_{{best.id}}_best" hx-swap="innerHTML"
+                                    hx-indicator="#load_new_toggle_dislike_{{best.id}}_best"><input type="hidden"
+                                        name="tag" value="track_dislike"><input type="hidden" name="id"
+                                        value="{{best.id}}"><input type="hidden" name="location" value="best"><button
+                                        type="submit" class="btn w-100 rounded-pill"><span
+                                            id="display_toggle_like_{{best.id}}_best"><i
+                                                class="bi bi-heartbreak text-light me-2"><span
+                                                    class="ms-2">Dislike</span></i></span></button></form>
+                            </li>
+                            <div id="load_new_toggle_dislike_{{best.id}}_best" class="htmx-indicator">
+                                <div class="text-center">
+                                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'to_album' best.id %}" hx-target="#display_to_albums_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_to_album_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-vinyl text-light me-2"><span
+                                    class="ms-2">Album</span></i></button></form>
+                </li>
+                <div id="load_new_to_album_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_to_albums_{{best.id}}_best">
+
+                </div>
+
+                <li class="list-group-item rounded-pill ">
+                    <form hx-post="{% url 'add_tracks' best.id %}" hx-target="#display_add_bests_{{best.id}}_best"
+                        hx-swap="innerHTML" hx-indicator="#load_new_add_bests_{{best.id}}_best"><button type="submit"
+                            class="btn w-100 text-start rounded-pill"><i class="bi bi-plus-lg text-light me-2"><span
+                                    class="ms-2">Add</span></i></button></form>
+                </li>
+                <div id="load_new_add_bests_{{best.id}}_best" class="htmx-indicator my-auto">
+                    <div class="text-center">
+                        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="display_add_bests_{{best.id}}_best">
+
+                </div>
+
+            </ul>
+        </ul>
+    </div>
+
+    <script>
+        document.getElementById('btn_desc_{{best.id}}_best').addEventListener("click", function () {
+            if (document.getElementById('desc_{{best.id}}_best').style.display === "none" && document
+                .getElementById('icon_desc_{{best.id}}_best').classList.contains("text-light")) {
+                document.getElementById('desc_{{best.id}}_best').style.display = "block";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-light");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-warning");
+            } else {
+                document.getElementById('desc_{{best.id}}_best').style.display = "none";
+                document.getElementById('icon_desc_{{best.id}}_best').classList.remove("text-warning");
+                document.getElementById('icon_desc_{{best.id}}_best').classList.add("text-light");
+            }
+
+        });
+    </script>
+
+
+    <!------------ END EPISODE CARD---------- -->
+
+</li>
+<div id="load_episode_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+
+{% elif type == 'video' %}
+<form hx-post="{% url 'video' best.id %}" hx-swap="innerHTML" hx-target="#display_best_video_{{best.id}}"
+    hx-indicator="#load_video_best_{{best.id}}">
+    <button class="w-100" type="submit">
+        <li class="list-group-item step rounded-pill">
+            <div class="d-flex track"> {% if best.cover_uri %}
+                <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.cover_uri|replace|extend}}"
+                    class="rounded-circle my-auto" alt="">{% else %}
+                <img style="height: 50px; width: 50px; border-radius: 50%;" src="{{best.og_image|replace|extend}}"
+                    class="rounded-circle my-auto" alt="">{% endif %}
+                <div class="ms-3 my-auto" style="text-align: left;">
+                    <div class="text-light text-state"> {{type|title}} </div>
+                    <div class="text-secondary text-state" style="font-weight: 400;"> {{best_result}} </div>
+                </div>
+            </div>
+        </li>
+    </button></form>
+
+<div id="load_video_best_{{best.id}}" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+<div id="display_best_video_{{best.id}}">
+
+</div>
+{% endif %}
+{% endif %}
+{% endif %}
+
+</ul>
+<div id="load_new_best" class="htmx-indicator">
+    <div class="text-center">
+        <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+    </div>
+</div>
+</div>

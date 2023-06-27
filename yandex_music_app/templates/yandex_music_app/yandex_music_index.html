@@ -1,0 +1,141 @@
+{% load static %}
+{% load template_filters %}
+<div class="my-1">
+    <div class="d-flex justify-content-between border border-warning rounded-pill" style=" border-radius: 5px;">
+        <div class="ms-5 my-auto">
+            <img  src="{% static 'img/Yandex_Music_icon.svg.png' %}" style="width: 50px; height: 50px" alt="yandex logo">
+            
+        </div>
+
+        <div class="d-flex me-3 my-auto">
+            <button onclick="toggleYaMusic()" class="btn rounded-pill" aria-controls="search_people">
+                <i class="bi bi-search text-light"></i>
+            </button>
+
+            <div hx-post="{% url 'yandex_music_client'  %}" hx-target="#client_home" hx-indicator="#spinner_client_home" hx-swap="innerHTML" hx-trigger="load"></div>
+
+            <form hx-post="{% url 'yandex_music_client'  %}" hx-target="#client_home" hx-indicator="#spinner_client_home" hx-swap="innerHTML"><button id="auto_refresh" class="btn rounded-pill"><i class="bi bi-arrow-clockwise text-light"></i></button></form>
+
+            <button onclick="toggleYaMusicFull()"  class="btn rounded-pill"><i id="icon" class="bi bi-arrows-angle-expand text-light"></i></button>
+
+            <button type="button" class="btn rounded-pill" data-bs-toggle="modal"
+                data-bs-target="#deleteAccount">
+                <i class="bi bi-box-arrow-right text-danger"></i>
+            </button>
+            <div class="modal fade" id="deleteAccount" tabindex="-1" aria-labelledby="deleteAccountLabel"
+                aria-hidden="true">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content border border-warning">
+                        <div class="modal-body  text-light text-center ">
+                            <p class="my-2 text-center" style="font-size: small;">This will Delete Your Yandex Music Access From YM Site <br> Do You wish To Go Ahead ?</p>
+                        </div>
+                        <div class="modal-footer d-flex justify-content-center">
+                            <button type="button" class="btn btn-secondary rounded-pill"
+                                data-bs-dismiss="modal">CANCEL</button>
+                                <form hx-post="{% url 'delete_yandex_music' %}" hx-indicator="#y_form_spinner" hx-target="#music" hx-swap="innerHTML"><button data-bs-dismiss="modal" class="btn btn-outline-danger rounded-pill" type="submit">DELETE</button></form>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        
+            
+            
+
+            
+        </div>
+
+    </div>
+
+    <div class="yandexpages">
+
+        <div class="my-1 w-100" id="yandex_search" style="display: none;">
+
+
+            <div style="max-width: 400px; margin: 0 auto;">
+                <form hx-post="{% url 'yandex_music_search_result' 0 %}" hx-target="#search_result"
+                    hx-indicator="#spinner" hx-swap="innerHTML">
+
+                    <div class="input-group bg-light border rounded-pill">
+                        <input hx-post="{% url 'suggestion_yandex_music_search_result' %}"
+                            hx-trigger="keyup changed delay:500ms" hx-target="#suggestions"
+                            class="form-control search border-0  rounded-pill" type="search" name="searched"
+                            placeholder="search" list="suggestions" autocomplete="off">
+                        <span class="input-group-append my-auto">
+                            <button class="btn rounded-pill " type="submit" >
+                                <span class="text-dark"><i class="bi bi-search"></i></span>
+                            </button>
+                        </span>
+                    </div>
+
+                </form>
+
+            </div>
+            <div id="spinner" class="htmx-indicator">
+                <div class="text-center my-1">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+
+                {% include 'yandex_music_app/yandex_search.html' %}
+
+            </div>
+           
+        </div>
+        <div id="yandex_player" style="display: block;">
+
+            <div id="spinner_client_home" class="htmx-indicator">
+                <div class="text-center my-1">
+                    <div class="spinner-grow text-warning spinner-grow-sm " role="status">
+                        <span class="visually-hidden">Loading...</span>
+                    </div>
+                </div>
+            </div>
+
+            <div>
+
+                {% include 'yandex_music_app/yandex_client.html' %}
+
+            </div>
+
+        </div>
+
+    </div>
+
+    <div>
+        {% if profile.last_track %}{% for last_track in profile.last_track.all %}{% if last_track.radio_first_track or last_track.station_settings2 %}
+        <form hx-post="{% url 'track' last_track.last_track %}" hx-target="#player_console" hx-swap="innerHTML" hx-trigger="load" hx-indicator="#player">
+        <input type="hidden" name="tag" value="{{last_track.tag}}">
+        <input type="hidden" name="sub_tag" value="{{last_track.sub_tag}}">
+        <input type="hidden" name="tagId" value="{{last_track.tag_id}}">
+        <input type="hidden" name="track_type" value="track">
+        <input type="hidden" name="track_type_id" value="{{last_track.last_track}}">
+        <input type="hidden" name="stations_origin" value="{{last_track.stations_origin}}">
+        <input type="hidden" name="radio_set" value="radio_set">
+        <input type="hidden" name="current_stations_origin" value="{{last_track.current_stations_origin}}">
+        <input type="hidden" name="station_id_for_from" value="{{last_track.station_id_for_from}}">    
+        <input type="hidden" name="stored_track" value="stored_track">
+        {% else %}
+         <form hx-post="{% url 'track' last_track.last_track %}" hx-target="#player_console" hx-swap="innerHTML" hx-trigger="load" hx-indicator="#player">
+            
+            <input type="hidden" name="tag" value="{{last_track.tag}}">
+            <input type="hidden" name="sub_tag" value="{{last_track.sub_tag}}">
+            <input type="hidden" name="tagId" value="{{last_track.tag_id}}">
+            <input type="hidden" name="track_type" value="{{last_track.track_type}}">
+            <input type="hidden" name="track_type_id" value="{{last_track.track_type_id}}">
+            <input type="hidden" name="stations_origin" value="{{last_track.stations_origin}}">
+            <input type="hidden" name="radio_set" value="{{last_track.radio_set}}">
+            <input type="hidden" name="current_stations_origin" value="{{last_track.current_stations_origin}}">
+            <input type="hidden" name="station_id_for_from" value="{{last_track.station_id_for_from}}">
+            <input type="hidden" name="stored_track" value="stored_track">
+           
+        </form>
+        {% endif %}{% endfor %}{% endif %}
+        
+    </div>
+</div>
+
